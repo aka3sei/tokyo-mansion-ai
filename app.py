@@ -66,35 +66,21 @@ with st.container():
         area = st.number_input("専有面積 (㎡)", min_value=10.0, max_value=300.0, value=60.0, step=1.0)
         walk = st.slider("駅より徒歩 (分)", 0, 30, 5)
     year_now = st.number_input("築年月 (西暦)", min_value=1970, max_value=2025, value=2015)
-# --- ボタンを画面の真ん中に強制配置する設定 ---
+# ボタンのデザインを整える（中央配置を補強）
 st.markdown("""
     <style>
-    /* ボタン全体を囲むコンテナの設定 */
-    .stButton {
-        display: flex;
-        justify-content: center; /* 横方向の中央寄せ */
-        margin-top: 20px;
-        margin-bottom: 20px;
+    div.stButton {
+        text-align: center;
     }
-    
-    /* ボタン本体のスタイル */
-    .stButton > button {
-        width: 80%;            /* 画面幅の80%（お好みで調整） */
-        height: 70px;          /* 高さ */
-        font-size: 26px !important; 
+    div.stButton > button {
+        width: 100%;           /* col_midの幅いっぱいに広げる */
+        height: 80px;          /* 高さを出す */
+        font-size: 28px !important; 
         font-weight: bold;
         background-color: #ff4b4b;
         color: white;
         border-radius: 15px;
-        border: 2px solid #ff4b4b;
-        transition: all 0.3s ease; /* 動きを滑らかに */
-    }
-
-    /* マウスを乗せた時の動き */
-    .stButton > button:hover {
-        background-color: white;
-        color: #ff4b4b;
-        transform: scale(1.02); /* 少しだけ大きくする */
+        box-shadow: 0 5px 15px rgba(255, 75, 75, 0.3);
     }
     </style>
     """, unsafe_allow_html=True)
@@ -143,6 +129,7 @@ if st.button("AI査定を実行する"):
     st.divider()
     st.subheader(f"🏙️ {ku}のマーケット分析")
     st.info(ku_details.get(ku, "データ準備中"))
+
 
 
 
