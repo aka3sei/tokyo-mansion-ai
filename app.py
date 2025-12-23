@@ -107,4 +107,8 @@ if st.button("AI査定を実行する"):
     m2.metric("AI予想利回り", f"{yield_rate:.2f} %")
     
     st.info(f"✨ **ブランド期待価格レンジ**: {int(price_base*0.95):,} 〜 {int(price_base*1.2):,} 万円")
-    st.write(f"💡 5年後の
+    st.write(f"💡 5年後の予想価格: **{price_future:,.0f} 万円**")
+
+    st.divider()
+    st.subheader(f"🏙️ {ku}のマーケット分析")
+    st.info(ku_details.get(ku, "データ準備中"))
