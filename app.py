@@ -232,13 +232,30 @@ st.set_page_config(page_title="23区マンションAI査定", layout="centered")
 
 st.markdown("""
     <style>
-    .market-card {
-        background-color: white; padding: 20px; border-radius: 12px;
-        border-top: 4px solid #ff4b4b; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        height: 200px; margin-bottom: 20px;
+    /* ボタンを中央に配置し、サイズを大きくする */
+    div.stButton {
+        text-align: center;
+        margin: 40px 0;
     }
-    .market-title { font-weight: bold; color: #ff4b4b; margin-bottom: 10px; font-size: 1.1rem; }
-    .market-content { font-size: 0.95rem; color: #333; line-height: 1.6; }
+    div.stButton > button {
+        width: 100% !important;
+        max-width: 400px; /* 横幅の最大値 */
+        height: 70px !important; /* 高さ */
+        font-size: 24px !important; /* 文字の大きさ */
+        font-weight: bold !important;
+        background-color: #ff4b4b !important; /* ボタンの色 */
+        color: white !important;
+        border-radius: 50px !important; /* 角を丸くしてモダンに */
+        box-shadow: 0 4px 15px rgba(255, 75, 75, 0.3); /* 影をつけて立体感を出す */
+        border: none !important;
+        transition: all 0.3s ease;
+    }
+    /* ホバー（マウスを乗せた時）の演出 */
+    div.stButton > button:hover {
+        transform: scale(1.03); /* 少し大きく */
+        box-shadow: 0 6px 20px rgba(255, 75, 75, 0.4);
+        background-color: #ff3333 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -334,5 +351,6 @@ if st.button("AI査定を実行する"):
     except Exception as e:
         st.error(f"査定中にエラーが発生しました: {e}")
    
+
 
 
