@@ -66,31 +66,35 @@ with st.container():
         area = st.number_input("専有面積 (㎡)", min_value=10.0, max_value=300.0, value=60.0, step=1.0)
         walk = st.slider("駅より徒歩 (分)", 0, 30, 5)
     year_now = st.number_input("築年月 (西暦)", min_value=1970, max_value=2025, value=2015)
-# ボタンを中央寄せ・巨大化するスタイル設定
+# --- ボタンを画面の真ん中に強制配置する設定 ---
 st.markdown("""
     <style>
-    /* ボタンを包む要素を中央に寄せる */
-    div.stButton {
-        text-align: center;
+    /* ボタン全体を囲むコンテナの設定 */
+    .stButton {
+        display: flex;
+        justify-content: center; /* 横方向の中央寄せ */
+        margin-top: 20px;
+        margin-bottom: 20px;
     }
-    /* ボタン自体の見た目をカスタマイズ */
-    div.stButton > button:first-child {
-        display: inline-block;
-        width: 100%;           /* 横幅いっぱい（中央配置を確実にするため） */
-        height: 70px;          /* 高さを出して大きく */
-        font-size: 26px !important;  /* 文字を大きく */
-        font-weight: bold;      /* 太字 */
-        background-color: #ff4b4b; /* 目立つ赤色 */
-        color: white;           /* 文字は白 */
-        border-radius: 12px;    /* 角を少し丸く */
-        border: none;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* 少し影をつけて浮かせる */
-    }
-    /* ホバー時（マウスを乗せた時）の色の変化 */
-    div.stButton > button:hover {
-        background-color: #ff3333;
-        border: none;
+    
+    /* ボタン本体のスタイル */
+    .stButton > button {
+        width: 80%;            /* 画面幅の80%（お好みで調整） */
+        height: 70px;          /* 高さ */
+        font-size: 26px !important; 
+        font-weight: bold;
+        background-color: #ff4b4b;
         color: white;
+        border-radius: 15px;
+        border: 2px solid #ff4b4b;
+        transition: all 0.3s ease; /* 動きを滑らかに */
+    }
+
+    /* マウスを乗せた時の動き */
+    .stButton > button:hover {
+        background-color: white;
+        color: #ff4b4b;
+        transform: scale(1.02); /* 少しだけ大きくする */
     }
     </style>
     """, unsafe_allow_html=True)
@@ -139,5 +143,6 @@ if st.button("AI査定を実行する"):
     st.divider()
     st.subheader(f"🏙️ {ku}のマーケット分析")
     st.info(ku_details.get(ku, "データ準備中"))
+
 
 
