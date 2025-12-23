@@ -66,7 +66,22 @@ with st.container():
         area = st.number_input("専有面積 (㎡)", min_value=10.0, max_value=300.0, value=60.0, step=1.0)
         walk = st.slider("駅より徒歩 (分)", 0, 30, 5)
     year_now = st.number_input("築年月 (西暦)", min_value=1970, max_value=2025, value=2015)
-
+# --- ボタンを大きく・中央に配置するための設定 ---
+st.markdown("""
+    <style>
+    div.stButton > button:first-child {
+        display: block;
+        margin: 0 auto;
+        width: 100%;
+        height: 60px;
+        font-size: 24px !important;
+        font-weight: bold;
+        background-color: #ff4b4b;
+        color: white;
+        border-radius: 10px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 # --- 6. 査定ロジック ---
 if st.button("AI査定を実行する"):
     # 推論用データの作成
@@ -112,3 +127,4 @@ if st.button("AI査定を実行する"):
     st.divider()
     st.subheader(f"🏙️ {ku}のマーケット分析")
     st.info(ku_details.get(ku, "データ準備中"))
+
