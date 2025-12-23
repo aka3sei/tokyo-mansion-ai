@@ -299,7 +299,7 @@ st.write("") # スペース
 # カラムで挟んで中央に寄せる
 c_left, c_mid, c_right = st.columns([1, 4, 1])
 with c_mid:
-    clicked = st.button("    AI査定を実行する    ")
+    clicked = st.button("AI査定を実行する")
 
 # --- 6. 査定ロジックと結果表示 ---
 if clicked:
@@ -349,4 +349,5 @@ if clicked:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+
 
