@@ -263,20 +263,32 @@ with st.container():
     year_now = st.number_input("築年月 (西暦)", value=2015)
 
 # --- 5. 査定実行と結果表示 ---
-if st.button("AI査定を実行する"):
-    # AIに渡す住所文字列を作成
-    full_address = f"東京都{selected_ku}{selected_loc}"
-    
-    # 推論処理
-    input_df = pd.DataFrame([{'区': selected_ku, '所在': full_address, '専有面積': area, '駅より徒歩': walk, '築年月': year_now}])
-    input_df['区'] = input_df['区'].astype('category')
-    input_df['所在'] = input_df['所在'].astype('category')
-    
     price_base = model.predict(input_df)[0]
+    
+    # 5年後予想や賃料の計算（必要に応じて）
+    input_future = input_df.copy()
+    input_future['築年月'] = year_now - 5
+    price_future = model.predict(input_future)[0]
     
     # 結果の表示
     st.divider()
-    st.metric("AI統計ベース価格", f"{round(price_base):,} 万円")
+    st.subheader(f"📊 診断結果: {selected_ku} {selected_loc}")
+    
+    m1, m2 = st.columns(2)
+    m1.metric("AI統計ベース価格", f"{round(price_base):,} 万円")
+    
+    # 利回りの簡易計算（以前のロジックを継続）
+    f = rent_factor.get(selected_ku, 1.0)
+    age_effect = max(0.65, 1.0 - (max(0, 2025 - year_now) * 0.008))
+    m2_rent = 3300 * f * age_effect
+    annual_rent_man = (m2_rent * area * 12) / 10000
+    yield_rate = (annual_rent_man / price_base) * 100
+    m2.metric("AI予想利回り", f"{yield_rate:.2f} %")
+    
+    # --- ここが復活させたブランド表示部分 ---
+    st.info(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
+    st.write(f"💡 5年後の予想価格: **{price_future:,.0f} 万円**")
+    # ----------------------------------------
 
     # --- 6. マーケット分析（4枚カード表示） ---
     st.divider()
@@ -290,3 +302,4 @@ if st.button("AI査定を実行する"):
     with c2:
         st.markdown(f'<div class="market-card"><div class="market-title">🗺️ 人気</div><div class="market-content">{data["人気"]}</div></div>', unsafe_allow_html=True)
         st.markdown(f'<div class="market-card"><div class="market-title">🏗️ 開発</div><div class="market-content">{data["開発"]}</div></div>', unsafe_allow_html=True)
+
