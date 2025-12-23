@@ -185,29 +185,46 @@ with st.container():
 # --- 6. 査定ボタン（中央配置デザイン） ---
 st.markdown("""
     <style>
-    /* ボタンを包む枠を中央寄せにする */
-    .stButton {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        padding: 30px 0;
-    }
-    /* ボタン自体のデザイン */
+    /* 全体のフォント設定 */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+    body { font-family: 'Noto Sans JP', sans-serif; }
+
+    /* ボタン中央配置 */
+    .stButton { display: flex; justify-content: center; width: 100%; padding: 30px 0; }
     .stButton > button {
-        width: 350px !important;
-        height: 75px !important;
-        font-size: 26px !important;
-        background-color: #ff4b4b !important;
-        color: white !important;
-        border-radius: 15px !important;
-        font-weight: bold !important;
-        box-shadow: 0 4px 15px rgba(255, 75, 75, 0.4);
-        border: none !important;
+        width: 350px !important; height: 75px !important; font-size: 26px !important;
+        background-color: #ff4b4b !important; color: white !important;
+        border-radius: 15px !important; font-weight: bold !important;
+        box-shadow: 0 4px 15px rgba(255, 75, 75, 0.4); border: none !important;
     }
-    .stButton > button:hover {
-        background-color: #ff3333 !important;
-        transform: scale(1.02);
-        transition: 0.3s;
+
+    /* 4分割カードのデザイン */
+    .market-card {
+        background-color: white;
+        padding: 20px;
+        border-radius: 12px;
+        border-top: 4px solid #ff4b4b; /* 左ではなく上にアクセント */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 柔らかい影 */
+        height: 180px; /* 高さを揃えて整列させる */
+        margin-bottom: 20px;
+        transition: transform 0.2s;
+    }
+    .market-card:hover {
+        transform: translateY(-5px); /* マウスを乗せると少し浮く */
+    }
+    .market-title {
+        font-weight: bold;
+        color: #ff4b4b;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .market-content {
+        font-size: 0.95rem;
+        color: #333;
+        line-height: 1.6;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -255,29 +272,38 @@ if st.button("AI査定を実行する"):
 
     st.divider()
     st.subheader(f"🏙️ {ku}のマーケット分析")
-    # --- 8. マーケット分析（4つの枠に分離） ---
+    
+    # --- 8. マーケット分析（デザイン改良版） ---
     st.divider()
     st.subheader(f"🏙️ {ku}のマーケット詳細分析")
     
-    # ここで ku_market_data を使っています
     data = ku_market_data.get(ku)
     
-    row1_col1, row1_col2 = st.columns(2)
-    row2_col1, row2_col2 = st.columns(2)
+    col1, col2 = st.columns(2)
     
-    with row1_col1:
-        st.markdown(f"""<div class="market-card"><div class="market-title">① エリアの特徴</div>
-                    <div class="market-content">{data['特徴']}</div></div>""", unsafe_allow_html=True)
-    with row1_col2:
-        st.markdown(f"""<div class="market-card"><div class="market-title">② 人気エリア・地名</div>
-                    <div class="market-content">{data['人気']}</div></div>""", unsafe_allow_html=True)
-    with row2_col1:
-        st.markdown(f"""<div class="market-card"><div class="market-title">③ 主要ブランド物件</div>
-                    <div class="market-content">{data['ブランド']}</div></div>""", unsafe_allow_html=True)
-    with row2_col2:
-        st.markdown(f"""<div class="market-card"><div class="market-title">④ 再開発・将来情報</div>
-                    <div class="market-content">{data['開発']}</div></div>""", unsafe_allow_html=True)
-
+    with col1:
+        st.markdown(f"""
+            <div class="market-card">
+                <div class="market-title">📍 エリアの特徴</div>
+                <div class="market-content">{data['特徴']}</div>
+            </div>
+            <div class="market-card">
+                <div class="market-title">🏢 主要ブランド</div>
+                <div class="market-content">{data['ブランド']}</div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    with col2:
+        st.markdown(f"""
+            <div class="market-card">
+                <div class="market-title">🗺️ 人気エリア</div>
+                <div class="market-content">{data['人気']}</div>
+            </div>
+            <div class="market-card">
+                <div class="market-title">🏗️ 再開発・将来性</div>
+                <div class="market-content">{data['開発']}</div>
+            </div>
+        """, unsafe_allow_html=True)
 
 
 
