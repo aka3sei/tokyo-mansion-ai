@@ -264,7 +264,8 @@ with st.container():
         selected_loc = st.selectbox("所在地（町名）を選択", town_options)
         
     with col2:
-        area = st.number_input("専有面積 (㎡)", value=60.0)
+        # step=1.0 にすることで1㎡ずつ変化し、format="%d" で整数表示にします
+area = st.number_input("専有面積 (㎡)", min_value=10.0, max_value=300.0, value=60.0, step=1.0, format="%d")
         walk = st.slider("駅より徒歩 (分)", 0, 30, 5)
     
     year_now = st.number_input("築年月 (西暦)", value=2015)
@@ -333,3 +334,4 @@ if st.button("AI査定を実行する"):
     except Exception as e:
         st.error(f"査定中にエラーが発生しました: {e}")
    
+
