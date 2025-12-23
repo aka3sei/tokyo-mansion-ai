@@ -263,33 +263,68 @@ with st.container():
     year_now = st.number_input("築年月 (西暦)", value=2015)
 
 # --- 5. 査定実行と結果表示 ---
-    price_base = model.predict(input_df)[0]
+if st.button("AI査定を実行する"):
+    # 1. 住所文字列の作成
+    full_address = f"東京都{selected_ku}{selected_loc}"
     
-    # 5年後予想や賃料の計算（必要に応じて）
-    input_future = input_df.copy()
-    input_future['築年月'] = year_now - 5
-    price_future = model.predict(input_future)[0]
-    
-    # 結果の表示
-    st.divider()
-    st.subheader(f"📊 診断結果: {selected_ku} {selected_loc}")
-    
-    m1, m2 = st.columns(2)
-    m1.metric("AI統計ベース価格", f"{round(price_base):,} 万円")
-    
-    # 利回りの簡易計算（以前のロジックを継続）
-    f = rent_factor.get(selected_ku, 1.0)
-    age_effect = max(0.65, 1.0 - (max(0, 2025 - year_now) * 0.008))
-    m2_rent = 3300 * f * age_effect
-    annual_rent_man = (m2_rent * area * 12) / 10000
-    yield_rate = (annual_rent_man / price_base) * 100
-    m2.metric("AI予想利回り", f"{yield_rate:.2f} %")
-    
-    # --- ここが復活させたブランド表示部分 ---
-    st.info(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
-    st.write(f"💡 5年後の予想価格: **{price_future:,.0f} 万円**")
-    # ----------------------------------------
+    # 2. AIに渡すデータフレームの作成 (ここで input_df を確実に定義)
+    # カラム名は、AIモデル学習時と同じ「区」「所在」「専有面積」「駅より徒歩」「築年月」にします
+    input_df = pd.DataFrame([{
+        '区': selected_ku, 
+        '所在': full_address, 
+        '専有面積': area, 
+        '駅より徒歩': walk, 
+        '築年月': year_now
+    }])
 
+    # 3. データ型の変換（LightGBMなどのモデルに必要）
+    input_df['区'] = input_df['区'].astype('category')
+    input_df['所在'] = input_df['所在'].astype('category')
+    
+    # 4. 推論の実行
+    try:
+        price_base = model.predict(input_df)[0]
+        
+        # 5年後予想価格の計算
+        input_future = input_df.copy()
+        input_future['築年月'] = year_now - 5
+        price_future = model.predict(input_future)[0]
+        
+        # --- 結果の表示 ---
+        st.divider()
+        st.subheader(f"📊 診断結果: {selected_ku} {selected_loc}")
+        
+        m1, m2 = st.columns(2)
+        m1.metric("AI統計ベース価格", f"{round(price_base):,} 万円")
+        
+        # 利回り計算
+        f = rent_factor.get(selected_ku, 1.0)
+        age_effect = max(0.65, 1.0 - (max(0, 2025 - year_now) * 0.008))
+        m2_rent = 3300 * f * age_effect
+        annual_rent_man = (m2_rent * area * 12) / 10000
+        yield_rate = (annual_rent_man / price_base) * 100
+        m2.metric("AI予想利回り", f"{yield_rate:.2f} %")
+        
+        st.info(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
+        st.write(f"💡 5年後の予想価格: **{price_future:,.0f} 万円**")
+
+        # --- 8. マーケット分析のカード表示（ここも続けて記述） ---
+        st.divider()
+        st.subheader(f"🏙️ {selected_ku}のマーケット詳細分析")
+        
+        data = ku_market_data.get(selected_ku)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"""<div class="market-card"><div class="market-title">📍 特徴</div><div class="market-content">{data['特徴']}</div></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div class="market-card"><div class="market-title">🏢 ブランド</div><div class="market-content">{data['ブランド']}</div></div>""", unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"""<div class="market-card"><div class="market-title">🗺️ 人気</div><div class="market-content">{data['人気']}</div></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div class="market-card"><div class="market-title">🏗️ 開発</div><div class="market-content">{data['開発']}</div></div>""", unsafe_allow_html=True)
+
+    except NameError as e:
+        st.error(f"変数名が正しくありません: {e}")
+    except Exception as e:
+        st.error(f"査定中にエラーが発生しました: {e}")
     # --- 6. マーケット分析（4枚カード表示） ---
     st.divider()
     st.subheader(f"🏙️ {selected_ku}のマーケット詳細分析")
@@ -302,4 +337,5 @@ with st.container():
     with c2:
         st.markdown(f'<div class="market-card"><div class="market-title">🗺️ 人気</div><div class="market-content">{data["人気"]}</div></div>', unsafe_allow_html=True)
         st.markdown(f'<div class="market-card"><div class="market-title">🏗️ 開発</div><div class="market-content">{data["開発"]}</div></div>', unsafe_allow_html=True)
+
 
