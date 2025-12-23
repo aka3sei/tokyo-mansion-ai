@@ -332,18 +332,4 @@ if st.button("AI査定を実行する"):
         st.error(f"変数名が正しくありません: {e}")
     except Exception as e:
         st.error(f"査定中にエラーが発生しました: {e}")
-    # --- 6. マーケット分析（4枚カード表示） ---
-    st.divider()
-    st.subheader(f"🏙️ {selected_ku}のマーケット詳細分析")
-    
-    data = ku_market_data.get(selected_ku)
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown(f'<div class="market-card"><div class="market-title">📍 特徴</div><div class="market-content">{data["特徴"]}</div></div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="market-card"><div class="market-title">🏢 ブランド</div><div class="market-content">{data["ブランド"]}</div></div>', unsafe_allow_html=True)
-    with c2:
-        st.markdown(f'<div class="market-card"><div class="market-title">🗺️ 人気</div><div class="market-content">{data["人気"]}</div></div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="market-card"><div class="market-title">🏗️ 開発</div><div class="market-content">{data["開発"]}</div></div>', unsafe_allow_html=True)
-
-
-
+   
