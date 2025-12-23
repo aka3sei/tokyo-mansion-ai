@@ -255,7 +255,29 @@ if st.button("AI査定を実行する"):
 
     st.divider()
     st.subheader(f"🏙️ {ku}のマーケット分析")
-    st.info(ku_details.get(ku, "詳細データ準備中"))
+    # --- 8. マーケット分析（4つの枠に分離） ---
+    st.divider()
+    st.subheader(f"🏙️ {ku}のマーケット詳細分析")
+    
+    # ここで ku_market_data を使っています
+    data = ku_market_data.get(ku)
+    
+    row1_col1, row1_col2 = st.columns(2)
+    row2_col1, row2_col2 = st.columns(2)
+    
+    with row1_col1:
+        st.markdown(f"""<div class="market-card"><div class="market-title">① エリアの特徴</div>
+                    <div class="market-content">{data['特徴']}</div></div>""", unsafe_allow_html=True)
+    with row1_col2:
+        st.markdown(f"""<div class="market-card"><div class="market-title">② 人気エリア・地名</div>
+                    <div class="market-content">{data['人気']}</div></div>""", unsafe_allow_html=True)
+    with row2_col1:
+        st.markdown(f"""<div class="market-card"><div class="market-title">③ 主要ブランド物件</div>
+                    <div class="market-content">{data['ブランド']}</div></div>""", unsafe_allow_html=True)
+    with row2_col2:
+        st.markdown(f"""<div class="market-card"><div class="market-title">④ 再開発・将来情報</div>
+                    <div class="market-content">{data['開発']}</div></div>""", unsafe_allow_html=True)
+
 
 
 
