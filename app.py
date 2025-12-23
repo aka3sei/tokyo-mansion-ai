@@ -270,9 +270,7 @@ if st.button("AI査定を実行する"):
     st.info(f"✨ **ブランド期待価格レンジ**: {round(price_base*1.0):,} 〜 {round(price_base*1.2):,} 万円")
     st.write(f"💡 5年後の予想価格: **{price_future:,.0f} 万円**")
 
-    st.divider()
-    st.subheader(f"🏙️ {ku}のマーケット分析")
-    
+
     # --- 8. マーケット分析（デザイン改良版） ---
     st.divider()
     st.subheader(f"🏙️ {ku}のマーケット詳細分析")
@@ -304,6 +302,7 @@ if st.button("AI査定を実行する"):
                 <div class="market-content">{data['開発']}</div>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
