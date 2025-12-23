@@ -232,30 +232,40 @@ st.set_page_config(page_title="23区マンションAI査定", layout="centered")
 
 st.markdown("""
     <style>
-    /* ボタンを中央に配置し、サイズを大きくする */
+    /* 全体の背景 */
+    .stApp { background-color: #f8f9fa; }
+    
+    /* 巨大な査定ボタンのデザイン */
     div.stButton {
         text-align: center;
-        margin: 40px 0;
+        padding: 20px 0;
     }
     div.stButton > button {
         width: 100% !important;
-        max-width: 400px; /* 横幅の最大値 */
-        height: 70px !important; /* 高さ */
-        font-size: 24px !important; /* 文字の大きさ */
+        max-width: 500px;
+        height: 80px !important;
+        font-size: 26px !important;
         font-weight: bold !important;
-        background-color: #ff4b4b !important; /* ボタンの色 */
+        background: linear-gradient(135deg, #ff4b4b 0%, #ff7575 100%) !important;
         color: white !important;
-        border-radius: 50px !important; /* 角を丸くしてモダンに */
-        box-shadow: 0 4px 15px rgba(255, 75, 75, 0.3); /* 影をつけて立体感を出す */
+        border-radius: 40px !important;
+        box-shadow: 0 8px 20px rgba(255, 75, 75, 0.3) !important;
         border: none !important;
         transition: all 0.3s ease;
     }
-    /* ホバー（マウスを乗せた時）の演出 */
     div.stButton > button:hover {
-        transform: scale(1.03); /* 少し大きく */
-        box-shadow: 0 6px 20px rgba(255, 75, 75, 0.4);
-        background-color: #ff3333 !important;
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 12px 25px rgba(255, 75, 75, 0.4) !important;
     }
+
+    /* マーケットカードのデザイン */
+    .market-card {
+        background-color: white; padding: 20px; border-radius: 15px;
+        border-left: 5px solid #ff4b4b; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        height: 160px; margin-bottom: 20px;
+    }
+    .market-title { font-weight: bold; color: #ff4b4b; margin-bottom: 10px; font-size: 1.1rem; }
+    .market-content { font-size: 0.95rem; color: #333; line-height: 1.6; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -267,59 +277,50 @@ def load_model():
 
 model = load_model()
 
-# --- 4. 入力フォーム（ここを選択式に変更） ---
+# --- 4. 入力フォーム ---
 st.title("🏙️ 東京23区マンション AI査定")
+st.caption("AIが最新の市場データに基づき、あなたのマンションの価値を瞬時に算出します。")
 
 with st.container():
     col1, col2 = st.columns(2)
     with col1:
-        # 区を選択
         selected_ku = st.selectbox("区を選択", list(ku_market_data.keys()))
-        
-        # 町名を選択（選ばれた区に連動してtown_dataからリストを表示）
         town_options = town_data.get(selected_ku, ["その他"])
         selected_loc = st.selectbox("所在地（町名）を選択", town_options)
         
     with col2:
-        # step=1.0 にすることで1㎡ずつ変化し、format="%d" で整数表示にします
         area = st.number_input("専有面積 (㎡)", min_value=10, max_value=300, value=60, step=1, format="%d")
         walk = st.slider("駅より徒歩 (分)", 0, 30, 5)
     
-    year_now = st.number_input("築年月 (西暦)", value=2015)
+    year_now = st.number_input("築年月 (西暦)", min_value=1970, max_value=2025, value=2015, step=1, format="%d")
 
-# --- 5. 査定実行と結果表示 ---
-if st.button("AI査定を実行する"):
-    # 1. 住所文字列の作成
+# --- 5. 査定実行ボタン（中央配置） ---
+st.write("") # スペース
+# カラムで挟んで中央に寄せる
+c_left, c_mid, c_right = st.columns([1, 4, 1])
+with c_mid:
+    clicked = st.button("AI査定を実行する")
+
+# --- 6. 査定ロジックと結果表示 ---
+if clicked:
     full_address = f"東京都{selected_ku}{selected_loc}"
-    
-    # 2. AIに渡すデータフレームの作成 (ここで input_df を確実に定義)
-    # カラム名は、AIモデル学習時と同じ「区」「所在」「専有面積」「駅より徒歩」「築年月」にします
     input_df = pd.DataFrame([{
-        '区': selected_ku, 
-        '所在': full_address, 
-        '専有面積': area, 
-        '駅より徒歩': walk, 
-        '築年月': year_now
+        '区': selected_ku, '所在': full_address, '専有面積': area, 
+        '駅より徒歩': walk, '築年月': year_now
     }])
-
-    # 3. データ型の変換（LightGBMなどのモデルに必要）
     input_df['区'] = input_df['区'].astype('category')
     input_df['所在'] = input_df['所在'].astype('category')
     
-    # 4. 推論の実行
     try:
         price_base = model.predict(input_df)[0]
         
-        # 5年後予想価格の計算
-        input_future = input_df.copy()
-        input_future['築年月'] = year_now - 5
-        price_future = model.predict(input_future)[0]
-        
-        # --- 結果の表示 ---
+        # 結果表示
         st.divider()
-        st.subheader(f"📊 診断結果: {selected_ku} {selected_loc}")
+        st.balloons() # お祝い演出
+        st.subheader(f"📊 査定結果: {selected_ku} {selected_loc}")
         
         m1, m2 = st.columns(2)
+        # 数値をより目立たせる
         m1.metric("AI統計ベース価格", f"{round(price_base):,} 万円")
         
         # 利回り計算
@@ -330,27 +331,21 @@ if st.button("AI査定を実行する"):
         yield_rate = (annual_rent_man / price_base) * 100
         m2.metric("AI予想利回り", f"{yield_rate:.2f} %")
         
-        st.info(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
-        st.write(f"💡 5年後の予想価格: **{price_future:,.0f} 万円**")
+        # ブランド価格レンジ
+        st.success(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
 
-        # --- 8. マーケット分析のカード表示（ここも続けて記述） ---
+        # --- マーケット分析 ---
         st.divider()
         st.subheader(f"🏙️ {selected_ku}のマーケット詳細分析")
         
         data = ku_market_data.get(selected_ku)
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown(f"""<div class="market-card"><div class="market-title">📍 特徴</div><div class="market-content">{data['特徴']}</div></div>""", unsafe_allow_html=True)
-            st.markdown(f"""<div class="market-card"><div class="market-title">🏢 ブランド</div><div class="market-content">{data['ブランド']}</div></div>""", unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"""<div class="market-card"><div class="market-title">🗺️ 人気</div><div class="market-content">{data['人気']}</div></div>""", unsafe_allow_html=True)
-            st.markdown(f"""<div class="market-card"><div class="market-title">🏗️ 開発</div><div class="market-content">{data['開発']}</div></div>""", unsafe_allow_html=True)
+        mc1, mc2 = st.columns(2)
+        with mc1:
+            st.markdown(f'<div class="market-card"><div class="market-title">📍 特徴</div><div class="market-content">{data["特徴"]}</div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="market-card"><div class="market-title">🏢 ブランド</div><div class="market-content">{data["ブランド"]}</div></div>', unsafe_allow_html=True)
+        with mc2:
+            st.markdown(f'<div class="market-card"><div class="market-title">🗺️ 人気エリア</div><div class="market-content">{data["人気"]}</div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="market-card"><div class="market-title">🏗️ 開発・将来性</div><div class="market-content">{data["開発"]}</div></div>', unsafe_allow_html=True)
 
-    except NameError as e:
-        st.error(f"変数名が正しくありません: {e}")
     except Exception as e:
-        st.error(f"査定中にエラーが発生しました: {e}")
-   
-
-
-
+        st.error(f"エラーが発生しました: {e}")
