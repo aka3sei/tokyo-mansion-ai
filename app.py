@@ -69,21 +69,21 @@ st.set_page_config(page_title="23区マンションAI査定", layout="centered")
 # --- ここから追加 ---
 hide_st_style = """
     <style>
-    /* 右上のメニューボタンとヘッダーを消す */
+    /* 右上のメニューボタンとヘッダーを完全に消去 */
     header[data-testid="stHeader"] { visibility: hidden; display: none; }
     footer { visibility: hidden; }
 
-    /* 上部と左右の余白を極限まで削る */
+    /* 上下の余白調整 */
     .block-container {
-        padding-top: 0rem !important;
-        padding-bottom: 6rem !important; /* iPhoneホームバー対策で下は広め */
+        padding-top: 2rem !important;   /* 上に見切れないよう少し（2rem）余白を確保 */
+        padding-bottom: 7rem !important; /* 下はホームバーを避けて多めに確保 */
         padding-left: 1rem !important;
         padding-right: 1rem !important;
     }
 
-    /* タイトルの位置をさらに上げる */
+    /* タイトルの余白をリセット（見切れ防止） */
     h1 {
-        margin-top: -40px !important;
+        margin-top: 0px !important;
         padding-top: 0px !important;
     }
     </style>
@@ -219,4 +219,5 @@ if clicked:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+
 
