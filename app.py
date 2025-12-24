@@ -87,7 +87,7 @@ st.markdown("""
     div.stButton > button {
         display: inline-block;
         width: auto !important;
-        min-width: 330px !important; /* 横幅をしっかり確保 */
+        min-width: 340px !important; /* 横幅をしっかり確保 */
         height: 60px !important;
         font-size: 26px !important;
         font-weight: bold !important;
@@ -194,5 +194,6 @@ if clicked:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+
 
 
