@@ -66,6 +66,31 @@ ku_market_data = {
 # --- 2. ページ設定とスタイル ---
 st.set_page_config(page_title="23区マンションAI査定", layout="centered")
 
+# --- ここから追加 ---
+hide_st_style = """
+    <style>
+    /* 右上のメニューボタンとヘッダーを消す */
+    header[data-testid="stHeader"] { visibility: hidden; display: none; }
+    footer { visibility: hidden; }
+
+    /* 上部と左右の余白を極限まで削る */
+    .block-container {
+        padding-top: 0rem !important;
+        padding-bottom: 6rem !important; /* iPhoneホームバー対策で下は広め */
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    /* タイトルの位置をさらに上げる */
+    h1 {
+        margin-top: -40px !important;
+        padding-top: 0px !important;
+    }
+    </style>
+"""
+st.markdown(hide_st_style, unsafe_allow_html=True)
+# --- ここまで追加 ---
+
 st.markdown("""
     <style>
     /* 全体の背景 */
@@ -194,3 +219,4 @@ if clicked:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+
