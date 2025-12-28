@@ -3,7 +3,7 @@ import pandas as pd
 import pickle
 import lightgbm as lgb
 
-# --- 1. データ定義（town_data, ku_market_data, rent_factor は維持） ---
+# --- 1. データ定義（変更なし） ---
 rent_factor = {
     '千代田区': 1.25, '中央区': 1.18, '港区': 1.35, '新宿区': 1.10, '文京区': 1.05,
     '台東区': 1.00, '墨田区': 0.95, '江東区': 1.02, '品川区': 1.08, '目黒区': 1.15,
@@ -63,34 +63,83 @@ ku_market_data = {
     '江戸川区': {'特徴': "子育て支援策は都内随一。東西線沿線の利便性と広い住環境を求める層に安定した人気。", '人気': "葛西、西葛西、船堀、小岩、瑞江", 'ブランド': "プラウドタワー小岩、パークホームズ瑞江、プラウド瑞江、レジデントプレイス西葛西、ザ・パークハウス船堀", '開発': "小岩駅周辺で複数の再開発が同時進行中。下町のイメージを塗り替える変革期です。"}
 }
 
-
 # --- 2. ページ設定とスタイル ---
 st.set_page_config(page_title="23区マンションAI査定", layout="centered")
 
+# --- ここから追加 ---
 hide_st_style = """
     <style>
+    /* 右上のメニューボタンとヘッダーを完全に消去 */
     header[data-testid="stHeader"] { visibility: hidden; display: none; }
     footer { visibility: hidden; }
-    .block-container { padding-top: 2rem !important; padding-bottom: 7rem !important; }
-    .stApp { background-color: #f8f9fa; }
-    .center-container { display: flex; justify-content: center; width: 100%; margin: 40px 0; }
-    div.stButton > button {
-        min-width: 340px !important; height: 60px !important; font-size: 26px !important;
-        font-weight: bold !important; background: linear-gradient(135deg, #ff4b4b 0%, #ff7575 100%) !important;
-        color: white !important; border-radius: 40px !important;
-        box-shadow: 0 8px 20px rgba(255, 75, 75, 0.3) !important; border: none !important;
+
+    /* 上下の余白調整 */
+    .block-container {
+        padding-top: 2rem !important;   /* 上に見切れないよう少し（2rem）余白を確保 */
+        padding-bottom: 7rem !important; /* 下はホームバーを避けて多めに確保 */
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
     }
-    .up-card {
-        background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
-        padding: 20px; border-radius: 15px; border: 2px solid #ff7575;
-        text-align: center; box-shadow: 0 4px 15px rgba(255, 75, 75, 0.1);
-        margin-bottom: 20px;
+
+    /* タイトルの余白をリセット（見切れ防止） */
+    h1 {
+        margin-top: 0px !important;
+        padding-top: 0px !important;
     }
-    .up-label { color: #ff4b4b; font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; }
-    .up-price { color: #ff4b4b; font-size: 1.8rem; font-weight: bold; }
     </style>
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
+# --- ここまで追加 ---
+
+st.markdown("""
+    <style>
+    /* 全体の背景 */
+    .stApp { background-color: #f8f9fa; }
+    
+    /* ボタンを強制的に中央に配置するための親コンテナ */
+    .center-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 40px 0;
+    }
+
+    div.stButton {
+        text-align: center;
+    }
+
+    /* ボタン自体のデザイン */
+    div.stButton > button {
+        display: inline-block;
+        width: auto !important;
+        min-width: 340px !important; /* 横幅をしっかり確保 */
+        height: 60px !important;
+        font-size: 26px !important;
+        font-weight: bold !important;
+        background: linear-gradient(135deg, #ff4b4b 0%, #ff7575 100%) !important;
+        color: white !important;
+        border-radius: 40px !important;
+        box-shadow: 0 8px 20px rgba(255, 75, 75, 0.3) !important;
+        border: none !important;
+        transition: all 0.3s ease;
+        padding: 0 60px !important; /* 文字の前後の空白感をCSSでも担保 */
+    }
+    
+    div.stButton > button:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 12px 25px rgba(255, 75, 75, 0.4) !important;
+    }
+
+    /* マーケットカードのデザイン */
+    .market-card {
+        background-color: white; padding: 20px; border-radius: 15px;
+        border-left: 5px solid #ff4b4b; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        height: 160px; margin-bottom: 20px;
+    }
+    .market-title { font-weight: bold; color: #ff4b4b; margin-bottom: 10px; font-size: 1.1rem; }
+    .market-content { font-size: 0.95rem; color: #333; line-height: 1.6; }
+    </style>
+    """, unsafe_allow_html=True)
 
 # --- 3. モデル読み込み ---
 @st.cache_resource
@@ -110,65 +159,55 @@ with st.container():
         selected_ku = st.selectbox("区を選択", list(ku_market_data.keys()))
         town_options = town_data.get(selected_ku, ["その他"])
         selected_loc = st.selectbox("所在地（町名）を選択", town_options)
+        
     with col2:
         area = st.number_input("専有面積 (㎡)", min_value=10, max_value=300, value=60, step=1, format="%d")
         walk = st.slider("駅より徒歩 (分)", 0, 30, 5)
+    
     year_now = st.number_input("築年月 (西暦)", min_value=1970, max_value=2025, value=2015, step=1, format="%d")
 
-# --- 5. 査定実行ボタン ---
+# --- 5. 査定実行ボタン（中央配置の完成版） ---
+st.write("") 
+# divタグ(center-container)で囲むことで、CSSの中央寄せを確実に適用
 st.markdown('<div class="center-container">', unsafe_allow_html=True)
-clicked = st.button("　　AI査定を実行する　　") 
+clicked = st.button("　　AI査定を実行する　　") # 前後に全角空白を追加
 st.markdown('</div>', unsafe_allow_html=True)
 
 # --- 6. 査定ロジックと結果表示 ---
 if clicked:
     full_address = f"東京都{selected_ku}{selected_loc}"
-    
-    def predict_p(offset):
-        df = pd.DataFrame([{
-            '区': selected_ku, '所在': full_address, '専有面積': area, 
-            '駅より徒歩': walk, '築年月': year_now - offset
-        }])
-        df['区'] = df['区'].astype('category')
-        df['所在'] = df['所在'].astype('category')
-        return model.predict(df)[0]
+    input_df = pd.DataFrame([{
+        '区': selected_ku, '所在': full_address, '専有面積': area, 
+        '駅より徒歩': walk, '築年月': year_now
+    }])
+    input_df['区'] = input_df['区'].astype('category')
+    input_df['所在'] = input_df['所在'].astype('category')
     
     try:
-        price_base = predict_p(0)
-        price_5y = predict_p(5)
-        price_10y = predict_p(10)
+        price_base = model.predict(input_df)[0]
         
+        # 結果表示
         st.divider()
         st.balloons() 
         st.subheader(f"📊 査定結果: {selected_ku} {selected_loc}")
         
-        st.metric("AI査定価格（現在）", f"{round(price_base):,} 万円")
-
-        # --- 将来価値インサイト（値上がりの時のみ表示） ---
-        # どちらか一方が値上がりしていればセクションを表示
-        if price_5y > price_base or price_10y > price_base:
-            st.write("📈 **AI将来価値インサイト**")
-            
-            if price_5y > price_base:
-                st.markdown(f"""<div class="up-card">
-                    <div class="up-label">🚀 5年後のさらなる価値向上予測</div>
-                    <div class="up-price">{round(price_5y):,} 万円</div>
-                </div>""", unsafe_allow_html=True)
-            
-            if price_10y > price_base:
-                st.markdown(f"""<div class="up-card">
-                    <div class="up-label">🌟 10年後のプレミアム価格予測</div>
-                    <div class="up-price">{round(price_10y):,} 万円</div>
-                </div>""", unsafe_allow_html=True)
-        else:
-            # バグ修正：f-string（f"..."）にして変数を展開
-            st.success(f"✅ **資産安定性**: {selected_ku}のブランド力が強固な支えとなり、着実な資産防衛が期待できるエリアです。")
-
-        st.info(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
+        m1, m2 = st.columns(2)
+        m1.metric("AI統計ベース価格", f"{round(price_base):,} 万円")
+        
+        # 利回り計算
+        f = rent_factor.get(selected_ku, 1.0)
+        age_effect = max(0.65, 1.0 - (max(0, 2025 - year_now) * 0.008))
+        m2_rent = 3300 * f * age_effect
+        annual_rent_man = (m2_rent * area * 12) / 10000
+        yield_rate = (annual_rent_man / price_base) * 100
+        m2.metric("AI予想利回り", f"{yield_rate:.2f} %")
+        
+        st.success(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
 
         # --- マーケット分析 ---
         st.divider()
         st.subheader(f"🏙️ {selected_ku}のマーケット詳細分析")
+        
         data = ku_market_data.get(selected_ku)
         mc1, mc2 = st.columns(2)
         with mc1:
@@ -180,3 +219,6 @@ if clicked:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+
+
+
