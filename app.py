@@ -67,14 +67,13 @@ ku_market_data = {
 # --- 2. ページ設定とスタイル ---
 st.set_page_config(page_title="23区マンションAI査定", layout="centered")
 
-st.markdown("""
+hide_st_style = """
     <style>
     header[data-testid="stHeader"] { visibility: hidden; display: none; }
     footer { visibility: hidden; }
     .block-container { padding-top: 2rem !important; padding-bottom: 7rem !important; }
     .stApp { background-color: #f8f9fa; }
     .center-container { display: flex; justify-content: center; width: 100%; margin: 40px 0; }
-    div.stButton { text-align: center; }
     div.stButton > button {
         min-width: 340px !important; height: 60px !important; font-size: 26px !important;
         font-weight: bold !important; background: linear-gradient(135deg, #ff4b4b 0%, #ff7575 100%) !important;
@@ -85,15 +84,13 @@ st.markdown("""
         background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
         padding: 20px; border-radius: 15px; border: 2px solid #ff7575;
         text-align: center; box-shadow: 0 4px 15px rgba(255, 75, 75, 0.1);
+        margin-bottom: 20px;
     }
     .up-label { color: #ff4b4b; font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; }
     .up-price { color: #ff4b4b; font-size: 1.8rem; font-weight: bold; }
-    .stable-card {
-        background-color: #ffffff; padding: 20px; border-radius: 15px;
-        border: 1px solid #e0e0e0; text-align: center;
-    }
     </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # --- 3. モデル読み込み ---
 @st.cache_resource
@@ -105,7 +102,7 @@ model = load_model()
 
 # --- 4. 入力フォーム ---
 st.title("🏙️ 東京23区マンション AI査定")
-st.caption("AIが膨大な取引データから、将来の「価値向上」の可能性を分析します。")
+st.caption("AIが最新の市場データに基づき、あなたのマンションの価値を瞬時に算出します。")
 
 with st.container():
     col1, col2 = st.columns(2)
@@ -120,60 +117,58 @@ with st.container():
 
 # --- 5. 査定実行ボタン ---
 st.markdown('<div class="center-container">', unsafe_allow_html=True)
-clicked = st.button("　　AI査定を実行する　　")
+clicked = st.button("　　AI査定を実行する　　") 
 st.markdown('</div>', unsafe_allow_html=True)
 
 # --- 6. 査定ロジックと結果表示 ---
 if clicked:
     full_address = f"東京都{selected_ku}{selected_loc}"
     
-    def predict_price(y_offset):
-        input_df = pd.DataFrame([{
+    def predict_p(offset):
+        df = pd.DataFrame([{
             '区': selected_ku, '所在': full_address, '専有面積': area, 
-            '駅より徒歩': walk, '築年月': year_now - y_offset 
+            '駅より徒歩': walk, '築年月': year_now - offset
         }])
-        input_df['区'] = input_df['区'].astype('category')
-        input_df['所在'] = input_df['所在'].astype('category')
-        return model.predict(input_df)[0]
-
+        df['区'] = df['区'].astype('category')
+        df['所在'] = df['所在'].astype('category')
+        return model.predict(df)[0]
+    
     try:
-        price_now = predict_price(0)
-        price_5y = predict_price(5)
-        price_10y = predict_price(10)
-
+        price_base = predict_p(0)
+        price_5y = predict_p(5)
+        price_10y = predict_p(10)
+        
         st.divider()
-        st.balloons()
+        st.balloons() 
         st.subheader(f"📊 査定結果: {selected_ku} {selected_loc}")
         
-        # メイン現在価格
-        st.metric("AI査定価格（現在）", f"{round(price_now):,} 万円")
+        st.metric("AI査定価格（現在）", f"{round(price_base):,} 万円")
 
-        # --- 将来予測の条件分岐表示 ---
-        st.write("📈 **AI将来価値インサイト**")
-        
-        # 5年後判定
-        if price_5y > price_now:
-            st.markdown(f"""<div class="up-card">
-                <div class="up-label">🚀 5年後のさらなる価値向上予測</div>
-                <div class="up-price">{round(price_5y):,} 万円</div>
-                <div style="font-size:0.9rem; color:#ff4b4b;">AIはこのエリアの希少性が経年減価を上回ると予測しています</div>
-            </div>""", unsafe_allow_html=True)
+        # --- 将来価値インサイト（値上がりの時のみ表示） ---
+        # どちらか一方が値上がりしていればセクションを表示
+        if price_5y > price_base or price_10y > price_base:
+            st.write("📈 **AI将来価値インサイト**")
+            
+            if price_5y > price_base:
+                st.markdown(f"""<div class="up-card">
+                    <div class="up-label">🚀 5年後のさらなる価値向上予測</div>
+                    <div class="up-price">{round(price_5y):,} 万円</div>
+                </div>""", unsafe_allow_html=True)
+            
+            if price_10y > price_base:
+                st.markdown(f"""<div class="up-card">
+                    <div class="up-label">🌟 10年後のプレミアム価格予測</div>
+                    <div class="up-price">{round(price_10y):,} 万円</div>
+                </div>""", unsafe_allow_html=True)
         else:
-            st.info("✅ **5年後の見通し**: このエリアは高い流動性を維持しており、資産としての安定性が極めて高いと分析されました。")
+            # バグ修正：f-string（f"..."）にして変数を展開
+            st.success(f"✅ **資産安定性**: {selected_ku}のブランド力が強固な支えとなり、着実な資産防衛が期待できるエリアです。")
 
-        # 10年後判定
-        if price_10y > price_now:
-            st.markdown(f"""<div style="margin-top:15px;" class="up-card">
-                <div class="up-label">🌟 10年後のプレミアム価格予測</div>
-                <div class="up-price">{round(price_10y):,} 万円</div>
-                <div style="font-size:0.9rem; color:#ff4b4b;">長期にわたり「ヴィンテージ」として価値を確立するポテンシャルがあります</div>
-            </div>""", unsafe_allow_html=True)
-        else:
-            st.success("✅ **長期資産性**: 築年数が経過しても、{selected_ku}のブランド力が強固な支えとなり、着実な資産防衛が期待できます。")
+        st.info(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
 
+        # --- マーケット分析 ---
         st.divider()
         st.subheader(f"🏙️ {selected_ku}のマーケット詳細分析")
-        # (以下、マーケット分析の表示ロジック)
         data = ku_market_data.get(selected_ku)
         mc1, mc2 = st.columns(2)
         with mc1:
