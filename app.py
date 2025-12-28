@@ -12,120 +12,173 @@ st.set_page_config(page_title="23区マンション投資 AI出口戦略", layou
 
 st.markdown("""
     <style>
-    .main-title { font-size: 32px; font-weight: bold; color: #1e3799; text-align: center; margin-bottom: 5px; }
-    .expert-tag { background-color: #e3f2fd; color: #0d47a1; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
-    .center-container { display: flex; justify-content: center; width: 100%; margin: 25px 0; }
+    .main-title { font-size: 36px; font-weight: bold; color: #1e3799; text-align: center; margin-bottom: 10px; }
+    .sub-title { font-size: 18px; color: #4a69bd; text-align: center; margin-bottom: 30px; }
+    .expert-note { background-color: #fff9db; padding: 15px; border-radius: 10px; border-left: 5px solid #fcc419; margin-bottom: 20px; font-size: 0.9rem; }
+    .stMetric { background-color: #f1f2f6; padding: 15px; border-radius: 10px; border-left: 5px solid #1e3799; }
+    
+    /* ボタンを中央に配置 */
+    .center-container { display: flex; justify-content: center; width: 100%; margin: 30px 0; }
     div.stButton > button {
         min-width: 350px !important; height: 65px !important; font-size: 20px !important;
         background: linear-gradient(135deg, #1e3799 0%, #0984e3 100%) !important;
-        color: white !important; border-radius: 35px !important; border: none !important;
-        box-shadow: 0 10px 20px rgba(30, 55, 153, 0.2) !important;
+        color: white !important; border-radius: 32px !important; border: none !important;
+        box-shadow: 0 6px 15px rgba(30, 55, 153, 0.2) !important;
     }
-    .stMetric { background-color: #f8f9fa; border-left: 5px solid #1e3799; border-radius: 8px; }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🏢 マンション投資 AI出口戦略シミュレーター</div>', unsafe_allow_html=True)
-st.markdown('<div style="text-align:center;"><span class="expert-tag">インフレ相殺モデル・AI将来価値推論エンジン搭載</span></div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🏢 マンション投資の出口戦略</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">東京23区・全取引データ解析 AIシミュレーター</div>', unsafe_allow_html=True)
 
-# --- 2. データ処理・学習エンジン ---
+# --- 2. 23区データファイルのマッピング ---
+area_files = {
+    "千代田区": "千代田区中古マンション.csv", "中央区": "中央区中古マンション.csv", "港区": "港区中古マンション.csv",
+    "新宿区": "新宿区中古マンション.csv", "文京区": "文京区中古マンション.csv", "台東区": "台東区中古マンション.csv",
+    "墨田区": "墨田区中古マンション.csv", "江東区": "江東区中古マンション.csv", "品川区": "品川区中古マンション.csv",
+    "目黒区": "目黒区中古マンション.csv", "大田区": "大田区中古マンション.csv", "世田谷区": "世田谷区中古マンション.csv",
+    "渋谷区": "渋谷区中古マンション.csv", "中野区": "中野区中古マンション.csv", "杉並区": "杉並区中古マンション.csv",
+    "豊島区": "豊島区中古マンション.csv", "北区": "北区中古マンション.csv", "荒川区": "荒川区中古マンション.csv",
+    "板橋区": "板橋区中古マンション.csv", "練馬区": "練馬区中古マンション.csv", "足立区": "足立区中古マンション.csv",
+    "葛飾区": "葛飾区中古マンション.csv", "江戸川区": "江戸川区中古マンション.csv"
+}
+
+# --- 3. 高速データ処理・学習エンジン ---
 @st.cache_data
 def load_and_preprocess(area):
-    # (既存の area_files マッピングと前処理ロジック)
-    # ここではユーザーが配置した各区のCSV（「港区中古マンション.csv」等）を読み込みます
-    pass
+    file_path = area_files.get(area)
+    if not file_path or not os.path.exists(file_path):
+        return None
+    
+    df = pd.read_csv(file_path)
+    
+    def to_num(x):
+        if pd.isna(x): return np.nan
+        nums = re.findall(r'\d+', str(x).replace(',', ''))
+        return float(nums[0]) if nums else np.nan
+
+    df['price'] = df['販売価格'].apply(to_num)
+    df['area'] = df['専有面積'].apply(to_num)
+    
+    this_year = datetime.datetime.now().year
+    df['age'] = df['築年月'].apply(lambda x: this_year - int(re.findall(r'\d{4}', str(x))[0]) 
+                                  if re.findall(r'\d{4}', str(x)) else 20)
+    
+    df['walk'] = df['沿線・駅'].apply(lambda x: int(re.findall(r'歩(\d+)分', str(x))[0]) 
+                                   if re.findall(r'歩(\d+)分', str(x)) else 10)
+    
+    return df[['price', 'area', 'age', 'walk']].dropna()
 
 @st.cache_resource
 def train_area_model(area):
-    # (既存の RandomForestRegressor 学習ロジック)
-    # area, age, walk の3変数を学習
-    pass
-
-# --- 3. サイドバー設定 ---
-st.sidebar.header("🔍 分析条件")
-# 区の選択と、AIモデルの学習（実際の運用ではご自身のモデル/CSVに合わせてください）
-selected_area = st.sidebar.selectbox("区を選択", ["港区", "中央区", "千代田区", "渋谷区", "新宿区", "江東区"])
-
-with st.sidebar:
-    st.markdown("---")
-    st.subheader("💰 投資パラメーター")
-    p_price = st.number_input("購入価格 (万円)", value=8000)
-    p_rent = st.number_input("初期月額家賃 (円)", value=280000)
+    df_clean = load_and_preprocess(area)
+    if df_clean is None or df_clean.empty:
+        return None, None
     
-    st.markdown("---")
-    st.subheader("📈 インフレ設定（家賃計算用）")
-    inflation_rate = st.slider("想定インフレ率 (年 %)", 0.0, 3.0, 1.5, help="家賃上昇への寄与率")
-    depreciation_rate = st.slider("築年数による減価率 (年 %)", 0.0, 2.0, 0.8, help="建物の老朽化による家賃下落率")
-
-    st.markdown("---")
-    st.subheader("🏢 物件スペック")
-    s_area = st.number_input("専有面積 (㎡)", value=50.0)
-    s_age = st.number_input("築年数 (購入時)", value=10)
-    s_walk = st.number_input("駅徒歩 (分)", value=5)
-
-# --- 4. 実行ボタン ---
-st.markdown('<div class="center-container">', unsafe_allow_html=True)
-clicked = st.button("　AI査定と出口戦略を算出　")
-st.markdown('</div>', unsafe_allow_html=True)
-
-if clicked:
-    # --- 5. AI推論 ＆ 家賃ロジック計算 ---
-    sim_years = 25
-    results = []
-    cumulative_rent = 0
+    X = df_clean[['area', 'age', 'walk']]
+    y = df_clean['price']
     
-    # 家賃の実質成長率（インフレ - 減価）
-    net_rent_growth = (inflation_rate / 100) - (depreciation_rate / 100)
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X, y)
+    return model, df_clean
 
-    for y in range(sim_years + 1):
-        # 【AI算出部分】将来の資産価値予測
-        # AIモデルに未来の築年数を入力し、統計的な市場価格を弾き出す
-        future_age = s_age + y
-        input_df = pd.DataFrame([[s_area, future_age, s_walk]], columns=['area', 'age', 'walk'])
-        # ai_model.predict(input_df) を実行（※実際の実装ではモデルを呼び出し）
-        predicted_price = p_price * (1.005 ** y) # ここはAIがエリアに合わせて算出する部分のダミー
+# --- 4. ユーザーインターフェース (サイドバー) ---
+st.sidebar.header("🔍 条件設定")
+selected_area = st.sidebar.selectbox("分析する区を選択", list(area_files.keys()))
+
+ai_model, train_data = train_area_model(selected_area)
+
+if ai_model is not None:
+    with st.sidebar:
+        st.markdown("---")
+        st.subheader("💰 投資パラメーター")
+        p_price = st.number_input("購入価格 (万円)", value=int(train_data['price'].median()))
+        p_rent = st.number_input("想定月額家賃 (円)", value=150000)
         
-        # 【数式部分】家賃収入の累計（インフレ相殺モデル）
-        current_annual_rent = (p_rent * ((1 + net_rent_growth) ** y)) * 12 * 0.8 / 10000
-        if y > 0:
-            cumulative_rent += current_annual_rent
+        st.markdown("---")
+        st.subheader("📈 インフレ・変動設定")
+        inflation_rate = st.slider("将来の想定インフレ率 (年 %)", 0.0, 3.0, 1.5)
+        depreciation_rate = st.slider("建物の経年減価率 (年 %)", 0.0, 2.0, 0.8)
+
+        st.markdown("---")
+        st.subheader("🏢 物件スペック")
+        s_area = st.number_input("専有面積 (㎡)", value=50.0)
+        s_age = st.number_input("築年数 (購入時)", value=10)
+        s_walk = st.number_input("駅徒歩 (分)", value=5)
+
+    # --- 5. 実行ボタン ---
+    st.markdown('<div class="center-container">', unsafe_allow_html=True)
+    clicked = st.button("　AI出口戦略シミュレーションを実行　")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    if clicked:
+        # --- 6. 出口シミュレーション計算 ---
+        sim_years = 25
+        results = []
+        cumulative_rent = 0
+        
+        # 実質家賃成長率（インフレ率 - 経年減価率）
+        net_rent_growth = (inflation_rate / 100) - (depreciation_rate / 100)
+        
+        for y in range(sim_years + 1):
+            # A. AIによる将来の資産価値予測
+            future_age = s_age + y
+            # 特徴量名付きDFで予測し、AIに値上がり・値下がりを判断させる
+            input_df = pd.DataFrame([[s_area, future_age, s_walk]], columns=['area', 'age', 'walk'])
+            predicted_price = ai_model.predict(input_df)[0]
             
-        # トータル損益算出
-        total_return = (predicted_price + cumulative_rent) - p_price
+            # B. 実質家賃収入（インフレ相殺モデル：経費率20%想定）
+            current_annual_rent = (p_rent * ((1 + net_rent_growth) ** y)) * 12 * 0.8 / 10000
+            
+            if y > 0:
+                cumulative_rent += current_annual_rent
+                
+            # トータル損益計算
+            total_return = (predicted_price + cumulative_rent) - p_price
+            results.append({
+                "年数": y, 
+                "予測物件価格": predicted_price, 
+                "累計家賃収入": cumulative_rent, 
+                "トータル損益": total_return
+            })
+
+        res_df = pd.DataFrame(results)
+        best_exit = res_df.loc[res_df['トータル損益'].idxmax()]
+
+        # --- 7. 結果の可視化 ---
+        st.info(f"✅ **{selected_area}** の市場データ（{len(train_data)}件）から、将来価値をAIが直接推論しました。")
+
+        c1, c2, c3 = st.columns(3)
+        c1.metric("推奨売却時期", f"{int(best_exit['年数'])}年後")
+        c2.metric("最大回収利益", f"{int(best_exit['トータル損益']):,}万円")
+        c3.metric("売却時のAI予測価格", f"{int(best_exit['予測物件価格']):,}万円")
+
         
-        results.append({
-            "年数": y, 
-            "予測物件価格": predicted_price, 
-            "累計家賃収入": cumulative_rent, 
-            "トータル損益": total_return
-        })
 
-    res_df = pd.DataFrame(results)
-    best_exit = res_df.loc[res_df['トータル損益'].idxmax()]
+        # グラフ作成
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=res_df['年数'], y=res_df['累計家賃収入'], name="累積家賃（インフレ相殺）", marker_color='rgba(52, 152, 219, 0.6)'))
+        fig.add_trace(go.Scatter(x=res_df['年数'], y=res_df['予測物件価格'], name="物件価値（AI推論）", line=dict(color='#e67e22', width=2, dash='dot')))
+        fig.add_trace(go.Scatter(x=res_df['年数'], y=res_df['トータル損益'], name="トータル損益", line=dict(color='#27ae60', width=4)))
+        
+        fig.update_layout(
+            title=f"【{selected_area}】保有期間別収益予測（インフレ率{inflation_rate}%想定）",
+            xaxis_title="保有年数（年）", yaxis_title="金額（万円）",
+            hovermode="x unified", template="plotly_white",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
-    # --- 6. 視覚化と診断 ---
-    st.info(f"✅ **{selected_area}** の市場特性をAIが解析。家賃計算には「インフレ率 {inflation_rate}%」を適用しました。")
+        # 専門家AIインサイト
+        st.markdown("### 🤖 AI出口診断レポート")
+        price_diff = res_df['予測物件価格'].iloc[10] - p_price
+        trend_status = "上昇傾向" if price_diff > 0 else "緩やかな下落傾向"
+        
+        st.write(f"""
+        - **価格トレンド:** AIは{selected_area}の統計から、今後10年間でこの物件が **{trend_status}** になると予測しました。
+        - **インフレ耐性:** 想定インフレ率{inflation_rate}%に対し、実質賃料成長率は{net_rent_growth*100:.1f}%です。累積家賃が資産価値の変動をカバーする構造になっています。
+        - **投資効率:** 利益が最大化される **{int(best_exit['年数'])}年後** が最も効率的な出口ですが、損益分岐点を超える **{res_df[res_df['トータル損益'] > 0]['年数'].min() if not res_df[res_df['トータル損益'] > 0].empty else '－'}年目** 以降であれば、現金化の選択肢が入ります。
+        """)
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("推奨出口時期", f"{int(best_exit['年数'])}年後")
-    c2.metric("予測最大収益", f"{int(best_exit['トータル損益']):,}万円")
-    c3.metric("その時のAI予想価格", f"{int(best_exit['予測物件価格']):,}万円")
-
-    
-
-    # Plotlyによる収益可視化
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=res_df['年数'], y=res_df['累計家賃収入'], name="累計家賃(インフレ相殺後)", marker_color='rgba(52, 152, 219, 0.6)'))
-    fig.add_trace(go.Scatter(x=res_df['年数'], y=res_df['予測物件価格'], name="AI予測価格(キャピタル)", line=dict(color='#e67e22', width=3)))
-    fig.add_trace(go.Scatter(x=res_df['年数'], y=res_df['トータル損益'], name="トータル損益", line=dict(color='#27ae60', width=4)))
-    
-    fig.update_layout(title="保有期間別：収益シミュレーション", hovermode="x unified", template="plotly_white")
-    st.plotly_chart(fig, use_container_width=True)
-
-    # AIアドバイス
-    st.markdown("### 🤖 AI出口戦略アドバイス")
-    price_change = res_df['予測物件価格'].iloc[15] - p_price
-    if price_change > 0:
-        st.success(f"**【強気予想】** AIはこの物件が築年数を経ても価格を維持、あるいは上昇させると予測しました。インフレ環境下で極めて強力な資産防衛となります。")
-    else:
-        st.warning(f"**【安定的減価】** AIは緩やかな価格下落を予測していますが、家賃収入によるインカムゲインがそれを補うため、{res_df[res_df['トータル損益'] > 0]['年数'].min() if not res_df[res_df['トータル損益'] > 0].empty else 'X'}年目以降の売却はプラス収支となります。")
+else:
+    st.error(f"エラー: {selected_area} のデータファイルが見つかりません。CSVファイルを確認してください。")
