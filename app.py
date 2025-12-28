@@ -3,7 +3,7 @@ import pandas as pd
 import pickle
 import lightgbm as lgb
 
-# --- 1. データ定義（変更なし） ---
+# --- 1. データ定義（town_data, ku_market_data, rent_factor は維持） ---
 rent_factor = {
     '千代田区': 1.25, '中央区': 1.18, '港区': 1.35, '新宿区': 1.10, '文京区': 1.05,
     '台東区': 1.00, '墨田区': 0.95, '江東区': 1.02, '品川区': 1.08, '目黒区': 1.15,
@@ -66,80 +66,29 @@ ku_market_data = {
 # --- 2. ページ設定とスタイル ---
 st.set_page_config(page_title="23区マンションAI査定", layout="centered")
 
-# --- ここから追加 ---
-hide_st_style = """
-    <style>
-    /* 右上のメニューボタンとヘッダーを完全に消去 */
-    header[data-testid="stHeader"] { visibility: hidden; display: none; }
-    footer { visibility: hidden; }
-
-    /* 上下の余白調整 */
-    .block-container {
-        padding-top: 2rem !important;   /* 上に見切れないよう少し（2rem）余白を確保 */
-        padding-bottom: 7rem !important; /* 下はホームバーを避けて多めに確保 */
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-
-    /* タイトルの余白をリセット（見切れ防止） */
-    h1 {
-        margin-top: 0px !important;
-        padding-top: 0px !important;
-    }
-    </style>
-"""
-st.markdown(hide_st_style, unsafe_allow_html=True)
-# --- ここまで追加 ---
-
+# 見切れ防止・メニュー非表示設定
 st.markdown("""
     <style>
-    /* 全体の背景 */
+    header[data-testid="stHeader"] { visibility: hidden; display: none; }
+    footer { visibility: hidden; }
+    .block-container { padding-top: 2rem !important; padding-bottom: 7rem !important; }
     .stApp { background-color: #f8f9fa; }
-    
-    /* ボタンを強制的に中央に配置するための親コンテナ */
-    .center-container {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        margin: 40px 0;
-    }
-
-    div.stButton {
-        text-align: center;
-    }
-
-    /* ボタン自体のデザイン */
+    .center-container { display: flex; justify-content: center; width: 100%; margin: 40px 0; }
+    div.stButton { text-align: center; }
     div.stButton > button {
-        display: inline-block;
-        width: auto !important;
-        min-width: 340px !important; /* 横幅をしっかり確保 */
-        height: 60px !important;
-        font-size: 26px !important;
-        font-weight: bold !important;
-        background: linear-gradient(135deg, #ff4b4b 0%, #ff7575 100%) !important;
-        color: white !important;
-        border-radius: 40px !important;
-        box-shadow: 0 8px 20px rgba(255, 75, 75, 0.3) !important;
-        border: none !important;
-        transition: all 0.3s ease;
-        padding: 0 60px !important; /* 文字の前後の空白感をCSSでも担保 */
+        min-width: 340px !important; height: 60px !important; font-size: 26px !important;
+        font-weight: bold !important; background: linear-gradient(135deg, #ff4b4b 0%, #ff7575 100%) !important;
+        color: white !important; border-radius: 40px !important;
+        box-shadow: 0 8px 20px rgba(255, 75, 75, 0.3) !important; border: none !important;
     }
-    
-    div.stButton > button:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 12px 25px rgba(255, 75, 75, 0.4) !important;
+    .future-card {
+        background-color: #ffffff; padding: 15px; border-radius: 10px;
+        border: 1px solid #eee; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
-
-    /* マーケットカードのデザイン */
-    .market-card {
-        background-color: white; padding: 20px; border-radius: 15px;
-        border-left: 5px solid #ff4b4b; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        height: 160px; margin-bottom: 20px;
-    }
-    .market-title { font-weight: bold; color: #ff4b4b; margin-bottom: 10px; font-size: 1.1rem; }
-    .market-content { font-size: 0.95rem; color: #333; line-height: 1.6; }
+    .future-label { color: #666; font-size: 0.9rem; margin-bottom: 5px; }
+    .future-price { color: #ff4b4b; font-size: 1.4rem; font-weight: bold; }
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # --- 3. モデル読み込み ---
 @st.cache_resource
@@ -151,7 +100,7 @@ model = load_model()
 
 # --- 4. 入力フォーム ---
 st.title("🏙️ 東京23区マンション AI査定")
-st.caption("AIが最新の市場データに基づき、あなたのマンションの価値を瞬時に算出します。")
+st.caption("AIが将来の減価率も含めた市場データに基づき、資産価値を予測します。")
 
 with st.container():
     col1, col2 = st.columns(2)
@@ -159,56 +108,67 @@ with st.container():
         selected_ku = st.selectbox("区を選択", list(ku_market_data.keys()))
         town_options = town_data.get(selected_ku, ["その他"])
         selected_loc = st.selectbox("所在地（町名）を選択", town_options)
-        
     with col2:
         area = st.number_input("専有面積 (㎡)", min_value=10, max_value=300, value=60, step=1, format="%d")
         walk = st.slider("駅より徒歩 (分)", 0, 30, 5)
-    
     year_now = st.number_input("築年月 (西暦)", min_value=1970, max_value=2025, value=2015, step=1, format="%d")
 
-# --- 5. 査定実行ボタン（中央配置の完成版） ---
-st.write("") 
-# divタグ(center-container)で囲むことで、CSSの中央寄せを確実に適用
+# --- 5. 査定実行ボタン ---
 st.markdown('<div class="center-container">', unsafe_allow_html=True)
-clicked = st.button("　　AI査定を実行する　　") # 前後に全角空白を追加
+clicked = st.button("　　AI査定を実行する　　")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # --- 6. 査定ロジックと結果表示 ---
 if clicked:
     full_address = f"東京都{selected_ku}{selected_loc}"
-    input_df = pd.DataFrame([{
-        '区': selected_ku, '所在': full_address, '専有面積': area, 
-        '駅より徒歩': walk, '築年月': year_now
-    }])
-    input_df['区'] = input_df['区'].astype('category')
-    input_df['所在'] = input_df['所在'].astype('category')
     
+    # AI推論用の共通関数
+    def predict_price(y_offset):
+        # 築年数を y_offset 年分進めてシミュレーション
+        input_df = pd.DataFrame([{
+            '区': selected_ku, '所在': full_address, '専有面積': area, 
+            '駅より徒歩': walk, '築年月': year_now - y_offset # 築年数を古くする
+        }])
+        input_df['区'] = input_df['区'].astype('category')
+        input_df['所在'] = input_df['所在'].astype('category')
+        return model.predict(input_df)[0]
+
     try:
-        price_base = model.predict(input_df)[0]
-        
-        # 結果表示
+        # 現在・5年後・10年後の価格をAIで算出
+        price_now = predict_price(0)
+        price_5y = predict_price(5)
+        price_10y = predict_price(10)
+
         st.divider()
-        st.balloons() 
+        st.balloons()
         st.subheader(f"📊 査定結果: {selected_ku} {selected_loc}")
         
-        m1, m2 = st.columns(2)
-        m1.metric("AI統計ベース価格", f"{round(price_base):,} 万円")
+        # メイン価格表示
+        st.metric("AI査定価格（現在）", f"{round(price_now):,} 万円")
         
-        # 利回り計算
-        f = rent_factor.get(selected_ku, 1.0)
-        age_effect = max(0.65, 1.0 - (max(0, 2025 - year_now) * 0.008))
-        m2_rent = 3300 * f * age_effect
-        annual_rent_man = (m2_rent * area * 12) / 10000
-        yield_rate = (annual_rent_man / price_base) * 100
-        m2.metric("AI予想利回り", f"{yield_rate:.2f} %")
-        
-        st.success(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
+        # 将来予測セクション
+        st.write("📈 **AI将来価値シミュレーション**")
+        f1, f2 = st.columns(2)
+        with f1:
+            st.markdown(f"""<div class="future-card">
+                <div class="future-label">5年後の予測価格</div>
+                <div class="future-price">{round(price_5y):,} 万円</div>
+                <div style="font-size:0.8rem; color:#888;">現在比: {round(price_5y/price_now*100,1)}%</div>
+            </div>""", unsafe_allow_html=True)
+        with f2:
+            st.markdown(f"""<div class="future-card">
+                <div class="future-label">10年後の予測価格</div>
+                <div class="future-price">{round(price_10y):,} 万円</div>
+                <div style="font-size:0.8rem; color:#888;">現在比: {round(price_10y/price_now*100,1)}%</div>
+            </div>""", unsafe_allow_html=True)
+
+        st.success(f"✨ **ブランド期待価格レンジ**: {round(price_now):,} 〜 {round(price_now*1.25):,} 万円")
 
         # --- マーケット分析 ---
         st.divider()
         st.subheader(f"🏙️ {selected_ku}のマーケット詳細分析")
-        
         data = ku_market_data.get(selected_ku)
+        # (以下、既存のカード表示ロジック)
         mc1, mc2 = st.columns(2)
         with mc1:
             st.markdown(f'<div class="market-card"><div class="market-title">📍 特徴</div><div class="market-content">{data["特徴"]}</div></div>', unsafe_allow_html=True)
@@ -219,6 +179,3 @@ if clicked:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
-
-
-
