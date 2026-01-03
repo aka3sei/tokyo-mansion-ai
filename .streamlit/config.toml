@@ -1,0 +1,8 @@
+[server]
+# ホームページへの埋め込みを許可し、エラーを防ぐ設定
+enableCORS = false
+enableXsrfProtection = false
+
+[browser]
+# ギャザー（統計収集）をオフにして動作を軽くする（任意）
+gatherUsageStats = false
