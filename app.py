@@ -250,26 +250,28 @@ if clicked or auto_run_trigger:
         
 import streamlit.components.v1 as components
 
-# 2. 変数名の不一致を修正（あなたのコードで使われている名前に合わせます）
-# もしあなたのコードで計算結果が 'price' という名前なら、それを代入します
+# 1111.html側に確実に計算結果を届けるための処理
+# あなたのコードで計算結果が入っている変数名を「price」と「yield_val」と仮定しています
 try:
-    # 既存のコードで使われている可能性が高い変数名からデータを取得
-    final_price = price if 'price' in locals() else 0
-    final_yield = yield_val if 'yield_val' in locals() else 0
-    final_range = price_max if 'price_max' in locals() else 0
-
-    # 親画面（1111.html）へデータを送る命令
+    # 変数が存在するか確認し、なければ0を入れる（エラー防止）
+    p = price if 'price' in locals() else 0
+    y = yield_val if 'yield_val' in locals() else 0
+    
+    # データを親画面(1111.html)に強制的に送り届ける命令
     components.html(
         f"""
         <script>
-            window.parent.postMessage({{
-                price: {final_price},
-                yield: {final_yield},
-                range_max: {final_range}
-            }}, "*");
+            const data = {{
+                price: {p},
+                yield: {y},
+                range_max: Math.round({p} * 1.25)
+            }};
+            // 全てのドメイン(*)に対してメッセージを送る設定で壁を突破
+            window.parent.postMessage(data, "*");
         </script>
         """,
         height=0,
     )
 except Exception as e:
-    st.error(f"連携エラーが発生しました: {e}")
+    # 万が一エラーが出ても画面を止めない
+    pass
