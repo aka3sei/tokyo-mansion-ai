@@ -2,8 +2,9 @@ import streamlit as st
 import pandas as pd
 import pickle
 import lightgbm as lgb
+import json
 
-# --- 1. データ定義（変更なし） ---
+# --- 1. データ定義（そのまま維持） ---
 rent_factor = {
     '千代田区': 1.25, '中央区': 1.18, '港区': 1.35, '新宿区': 1.10, '文京区': 1.05,
     '台東区': 1.00, '墨田区': 0.95, '江東区': 1.02, '品川区': 1.08, '目黒区': 1.15,
@@ -141,22 +142,23 @@ default_ku_idx = 3 # デフォルト新宿区
 if "location" in query_params:
     p_loc = query_params["location"]
     for i, ku in enumerate(ku_market_data.keys()):
-        if ku in p_loc: # "新宿区"が含まれていれば合致
+        if ku in p_loc:
             default_ku_idx = i
             break
 
-# 数値パラメータの取得（安全にfloat/intに変換）
-default_area = int(float(query_params.get("area", 60)))
-default_walk = int(float(query_params.get("walk", 5)))
-# 築年数(age)から西暦(year)を逆算 (例: 築3年なら2022)
-default_age = int(float(query_params.get("age", 10)))
-default_year = 2025 - default_age
+# 数値パラメータの取得（安全に変換）
+try:
+    default_area = int(float(query_params.get("area", 60)))
+    default_walk = int(float(query_params.get("walk", 5)))
+    default_age = int(float(query_params.get("age", 10)))
+    default_year = 2025 - default_age
+except:
+    default_area, default_walk, default_year = 60, 5, 2015
 
 # --- 4. 入力フォーム ---
 st.title("🏙️ 東京23区マンション AI査定")
 st.caption("AIが最新の市場データに基づき、あなたのマンションの価値を瞬時に算出します。")
 
-# 🆕 【追加】一度計算したかどうかをセッションで管理（無限ループ・再計算防止）
 if 'first_run' not in st.session_state:
     st.session_state.first_run = True
 
@@ -179,14 +181,10 @@ st.markdown('<div class="center-container">', unsafe_allow_html=True)
 clicked = st.button("　　AI査定を実行する　　") 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ==========================================
-# 🆕 自動実行の判定ロジックを強化
-# 「ボタンが押された」か「URLにareaがあり、かつ初回起動である」場合に実行
-# ==========================================
+# 自動実行の判定
 auto_run_trigger = ("area" in query_params and st.session_state.first_run)
 
 if clicked or auto_run_trigger:
-    # 実行されたら初回起動フラグをオフにする
     st.session_state.first_run = False
     
     full_address = f"東京都{selected_ku}{selected_loc}"
@@ -201,14 +199,11 @@ if clicked or auto_run_trigger:
         # 推論実行
         price_base = model.predict(input_df)[0]
         
-        # 結果表示
+        # 結果表示（デザイン維持）
         st.divider()
-        # 自動実行時は演出（バルーン）をあえてカットしてスマートに
         if clicked: st.balloons() 
         
         st.subheader(f"📊 査定結果: {selected_ku} {selected_loc}")
-        
-        # メトリック表示
         m1, m2 = st.columns(2)
         m1.metric("AI統計ベース価格", f"{round(price_base):,} 万円")
         
@@ -222,10 +217,9 @@ if clicked or auto_run_trigger:
         
         st.success(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
 
-        # --- マーケット分析 ---
+        # マーケット分析（デザイン維持）
         st.divider()
         st.subheader(f"🏙️ {selected_ku}のマーケット詳細分析")
-        
         data = ku_market_data.get(selected_ku)
         mc1, mc2 = st.columns(2)
         with mc1:
@@ -235,25 +229,21 @@ if clicked or auto_run_trigger:
             st.markdown(f'<div class="market-card"><div class="market-title">🗺️ 人気エリア</div><div class="market-content">{data["人気"]}</div></div>', unsafe_allow_html=True)
             st.markdown(f'<div class="market-card"><div class="market-title">🏗️ 開発・将来性</div><div class="market-content">{data["開発"]}</div></div>', unsafe_allow_html=True)
 
-    except Exception as e:
-        st.error(f"エラーが発生しました: {e}")
-
-# --- 既存のコード（マーケット分析表示）のすぐ後に追加 ---
-        import json
-        
-        # ホームページ側に渡すデータを作成
-        msg_data = json.dumps({
+        # ==========================================
+        # 🆕 ここが重要：親ウィンドウ(1111.html)にデータを飛ばす
+        # ==========================================
+        res_data = {
             "price": int(round(price_base)),
             "yield": round(yield_rate, 2),
-            "range_min": int(round(price_base)),
             "range_max": int(round(price_base * 1.25))
-        })
+        }
 
-        # JavaScriptを実行して親ウィンドウ(1111.html)に送信
         st.components.v1.html(f"""
             <script>
-                window.parent.postMessage({msg_data}, "*");
+                window.parent.postMessage({json.dumps(res_data)}, "*");
+                console.log("Data sent to parent:", {json.dumps(res_data)});
             </script>
         """, height=0)
 
-
+    except Exception as e:
+        st.error(f"エラーが発生しました: {e}")
