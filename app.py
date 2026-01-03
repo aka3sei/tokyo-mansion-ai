@@ -247,3 +247,21 @@ if clicked or auto_run_trigger:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+        
+import streamlit.components.v1 as components
+
+# 親画面（1111.html）に強制的にデータを送りつける命令
+components.html(
+    f"""
+    <script>
+        const data = {{
+            price: {price_result},
+            yield: {yield_result},
+            range_max: {range_max}
+        }};
+        // 親ウィンドウ（1111.html）に対して、全ての制限を無視してデータを送る
+        window.parent.postMessage(data, "*");
+    </script>
+    """,
+    height=0,
+)
