@@ -250,18 +250,26 @@ if clicked or auto_run_trigger:
         
 import streamlit.components.v1 as components
 
-# 親画面（1111.html）に強制的にデータを送りつける命令
-components.html(
-    f"""
-    <script>
-        const data = {{
-            price: {price_result},
-            yield: {yield_result},
-            range_max: {range_max}
-        }};
-        // 親ウィンドウ（1111.html）に対して、全ての制限を無視してデータを送る
-        window.parent.postMessage(data, "*");
-    </script>
-    """,
-    height=0,
-)
+# 2. 変数名の不一致を修正（あなたのコードで使われている名前に合わせます）
+# もしあなたのコードで計算結果が 'price' という名前なら、それを代入します
+try:
+    # 既存のコードで使われている可能性が高い変数名からデータを取得
+    final_price = price if 'price' in locals() else 0
+    final_yield = yield_val if 'yield_val' in locals() else 0
+    final_range = price_max if 'price_max' in locals() else 0
+
+    # 親画面（1111.html）へデータを送る命令
+    components.html(
+        f"""
+        <script>
+            window.parent.postMessage({{
+                price: {final_price},
+                yield: {final_yield},
+                range_max: {final_range}
+            }}, "*");
+        </script>
+        """,
+        height=0,
+    )
+except Exception as e:
+    st.error(f"連携エラーが発生しました: {e}")
