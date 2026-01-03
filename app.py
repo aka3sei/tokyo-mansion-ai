@@ -199,7 +199,7 @@ if clicked or auto_run_trigger:
         # 推論実行
         price_base = model.predict(input_df)[0]
         
-        # 結果表示（デザイン維持）
+        # 結果表示
         st.divider()
         if clicked: st.balloons() 
         
@@ -217,59 +217,33 @@ if clicked or auto_run_trigger:
         
         st.success(f"✨ **ブランド期待価格レンジ**: {round(price_base):,} 〜 {round(price_base*1.25):,} 万円")
 
-        # マーケット分析（デザイン維持）
-        st.divider()
-        st.subheader(f"🏙️ {selected_ku}のマーケット詳細分析")
-        data = ku_market_data.get(selected_ku)
-        mc1, mc2 = st.columns(2)
-        with mc1:
-            st.markdown(f'<div class="market-card"><div class="market-title">📍 特徴</div><div class="market-content">{data["特徴"]}</div></div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="market-card"><div class="market-title">🏢 ブランド</div><div class="market-content">{data["ブランド"]}</div></div>', unsafe_allow_html=True)
-        with mc2:
-            st.markdown(f'<div class="market-card"><div class="market-title">🗺️ 人気エリア</div><div class="market-content">{data["人気"]}</div></div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="market-card"><div class="market-title">🏗️ 開発・将来性</div><div class="market-content">{data["開発"]}</div></div>', unsafe_allow_html=True)
-
-        # ==========================================
-        # 🆕 ここが重要：親ウィンドウ(1111.html)にデータを飛ばす
-        # ==========================================
+        # --- ここから親画面（1111.html）への通信：1回にまとめました ---
         res_data = {
             "price": int(round(price_base)),
             "yield": round(yield_rate, 2),
             "range_max": int(round(price_base * 1.25))
         }
 
+        # JavaScriptを埋め込んで親にデータを送る
         st.components.v1.html(f"""
             <script>
+                // 親ウィンドウにデータを送信
                 window.parent.postMessage({json.dumps(res_data)}, "*");
-                console.log("Data sent to parent:", {json.dumps(res_data)});
+                console.log("Data sent to 1111.html:", {json.dumps(res_data)});
             </script>
         """, height=0)
 
+        # マーケット分析表示（デザイン維持）
+        st.divider()
+        st.subheader(f"🏙️ {selected_ku}のマーケット詳細分析")
+        market_info = ku_market_data.get(selected_ku)
+        mc1, mc2 = st.columns(2)
+        with mc1:
+            st.markdown(f'<div class="market-card"><div class="market-title">📍 特徴</div><div class="market-content">{market_info["特徴"]}</div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="market-card"><div class="market-title">🏢 ブランド</div><div class="market-content">{market_info["ブランド"]}</div></div>', unsafe_allow_html=True)
+        with mc2:
+            st.markdown(f'<div class="market-card"><div class="market-title">🗺️ 人気エリア</div><div class="market-content">{market_info["人気"]}</div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="market-card"><div class="market-title">🏗️ 開発・将来性</div><div class="market-content">{market_info["開発"]}</div></div>', unsafe_allow_html=True)
+
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
-        
-import streamlit.components.v1 as components
-
-# 変数名は、ご自身のコードで「価格」や「利回り」を計算している変数に合わせてください
-# ここでは例として price, yield_val を使用しています
-try:
-    p = price if 'price' in locals() else 0
-    y = yield_val if 'yield_val' in locals() else 0
-
-    # 親画面(1111.html)に計算結果を無理やり送り届けるJavaScriptを埋め込む
-    components.html(
-        f"""
-        <script>
-            const data = {{
-                price: {p},
-                yield: {y},
-                range_max: Math.round({p} * 1.25)
-            }};
-            // 全ての親ウィンドウ(*)に対してデータを送信
-            window.parent.postMessage(data, "*");
-        </script>
-        """,
-        height=0,
-    )
-except Exception as e:
-    st.error(f"連携エラー: {e}")
