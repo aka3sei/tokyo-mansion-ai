@@ -250,14 +250,13 @@ if clicked or auto_run_trigger:
         
 import streamlit.components.v1 as components
 
-# 1111.html側に確実に計算結果を届けるための処理
-# あなたのコードで計算結果が入っている変数名を「price」と「yield_val」と仮定しています
+# 変数名は、ご自身のコードで「価格」や「利回り」を計算している変数に合わせてください
+# ここでは例として price, yield_val を使用しています
 try:
-    # 変数が存在するか確認し、なければ0を入れる（エラー防止）
     p = price if 'price' in locals() else 0
     y = yield_val if 'yield_val' in locals() else 0
-    
-    # データを親画面(1111.html)に強制的に送り届ける命令
+
+    # 親画面(1111.html)に計算結果を無理やり送り届けるJavaScriptを埋め込む
     components.html(
         f"""
         <script>
@@ -266,12 +265,11 @@ try:
                 yield: {y},
                 range_max: Math.round({p} * 1.25)
             }};
-            // 全てのドメイン(*)に対してメッセージを送る設定で壁を突破
+            // 全ての親ウィンドウ(*)に対してデータを送信
             window.parent.postMessage(data, "*");
         </script>
         """,
         height=0,
     )
 except Exception as e:
-    # 万が一エラーが出ても画面を止めない
-    pass
+    st.error(f"連携エラー: {e}")
