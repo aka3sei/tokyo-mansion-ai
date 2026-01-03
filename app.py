@@ -238,3 +238,22 @@ if clicked or auto_run_trigger:
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
 
+# --- 既存のコード（マーケット分析表示）のすぐ後に追加 ---
+        import json
+        
+        # ホームページ側に渡すデータを作成
+        msg_data = json.dumps({
+            "price": int(round(price_base)),
+            "yield": round(yield_rate, 2),
+            "range_min": int(round(price_base)),
+            "range_max": int(round(price_base * 1.25))
+        })
+
+        # JavaScriptを実行して親ウィンドウ(1111.html)に送信
+        st.components.v1.html(f"""
+            <script>
+                window.parent.postMessage({msg_data}, "*");
+            </script>
+        """, height=0)
+
+
