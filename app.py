@@ -156,6 +156,10 @@ default_year = 2025 - default_age
 st.title("🏙️ 東京23区マンション AI査定")
 st.caption("AIが最新の市場データに基づき、あなたのマンションの価値を瞬時に算出します。")
 
+# 🆕 【追加】一度計算したかどうかをセッションで管理（無限ループ・再計算防止）
+if 'first_run' not in st.session_state:
+    st.session_state.first_run = True
+
 with st.container():
     col1, col2 = st.columns(2)
     with col1:
@@ -176,13 +180,15 @@ clicked = st.button("　　AI査定を実行する　　")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# 🆕 埋め込み時の自動実行フラグ
-# URLにパラメータが含まれている場合は、初回読み込み時に自動で計算を行う
+# 🆕 自動実行の判定ロジックを強化
+# 「ボタンが押された」か「URLにareaがあり、かつ初回起動である」場合に実行
 # ==========================================
-is_auto_run = ("area" in query_params)
+auto_run_trigger = ("area" in query_params and st.session_state.first_run)
 
-# --- 6. 査定ロジックと結果表示 ---
-if clicked or is_auto_run:
+if clicked or auto_run_trigger:
+    # 実行されたら初回起動フラグをオフにする
+    st.session_state.first_run = False
+    
     full_address = f"東京都{selected_ku}{selected_loc}"
     input_df = pd.DataFrame([{
         '区': selected_ku, '所在': full_address, '専有面積': area, 
@@ -192,13 +198,17 @@ if clicked or is_auto_run:
     input_df['所在'] = input_df['所在'].astype('category')
     
     try:
+        # 推論実行
         price_base = model.predict(input_df)[0]
         
         # 結果表示
         st.divider()
-        if not is_auto_run: st.balloons() # 手動クリック時のみバルーン
+        # 自動実行時は演出（バルーン）をあえてカットしてスマートに
+        if clicked: st.balloons() 
+        
         st.subheader(f"📊 査定結果: {selected_ku} {selected_loc}")
         
+        # メトリック表示
         m1, m2 = st.columns(2)
         m1.metric("AI統計ベース価格", f"{round(price_base):,} 万円")
         
@@ -227,3 +237,4 @@ if clicked or is_auto_run:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+
