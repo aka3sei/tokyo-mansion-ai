@@ -43,13 +43,13 @@ ku_market_data = {
     '港区': {'特徴': "3A（青山・赤坂・麻布）は別格。国内外の富裕層や投資資金が集中する日本不動産の頂点です。", '人気': "元麻布、南青山、赤坂、白金高輪、芝浦、港南", 'ブランド': "麻布台ヒルズレジデンス、パークコート赤坂檜町ザ・タワー、ワールドタワーレジデンス、元麻布ヒルズ、白金ザ・スカイ、ワールドシティタワーズ", '開発': "高輪ゲートウェイ駅周辺の『TAKANAWA GATEWAY CITY』全面開業を控え、期待値は最高潮です。"},
     '新宿区': {'特徴': "西新宿のタワー群から市谷・神楽坂の邸宅街まで多様な顔を持ち、職住近接需要が極めて強いエリア。", '人気': "市谷砂土原町、神楽坂、西新宿、下落合、富久町", 'ブランド': "富久クロスコンフォートタワー、セントラルパークタワー・ラ・トゥール新宿、ザ・センター東京、プラウド新宿中落合、パークシティ高田馬場", '開発': "新宿駅西口（小田急・京王）の巨大再開発により、ターミナル機能と居住価値が再評価されています。"},
     '文京区': {'特徴': "山手線内側で最も教育環境に優れたエリア。文教地区ブランドにより、ファミリー層の指名買いが絶えません。", '人気': "本駒込（大和郷）、小石川、西片、千駄木、関口", 'ブランド': "パークコート文京小石川ザ・タワー、プラウド文京千駄木、ザ・パークハウス小石川、グランドメゾン目白新坂、クレヴィア小石川後楽園", '開発': "春日・後楽園駅前の再開発完了により、伝統と先進が融合する完成度の高い街へ進化。"},
-    '台東区': {'特徴': "上野・浅草の文化拠点と、蔵前周辺の再開発により若年富裕層が急増。地価上昇率が際立つエリアです。", '人気': "上野池之端、蔵前、浅草、谷中、三ノ輪", 'ブランド': "ブリリアタワー上野池之端、パークホームズ蔵前レジデンス、プラウド浅草、ザ・パークハウス浅草、ルジェンテ上野", '開発': "蔵前駅前の複合開発や浅草通りの整備が進み、洗練された住宅街へと変貌を遂げました。"},
+    '台東区': {'特徴': "上野・浅草の文化拠点と、蔵前周辺の再開発により若年富裕層が急増。地価上昇率が際立つエリアです。", '人気': "上野池之端、蔵前、浅草、谷中、根岸", 'ブランド': "ブリリアタワー上野池之端、パークホームズ蔵前レジデンス、プラウド浅草、ザ・パークハウス浅草、ルジェンテ上野", '開発': "蔵前駅前の複合開発や浅草通りの整備が進み、洗練された住宅街へと変貌を遂げました。"},
     '墨田区': {'特徴': "スカイツリー周辺の観光開発と錦糸町の高い商業利便性が魅力。共働き世帯に選ばれるエリア。", '人気': "錦糸町、両国、押上、向島、本所", 'ブランド': "ザ・パークハウス錦糸町タワー、ブリリアタワー東京（錦糸町）、パークホームズ墨田、プラウドタワー亀戸クロス（近接）、シティハウス墨田", '開発': "錦糸町駅南口の再開発議論が進んでおり、将来的にはさらなる拠点性の向上が期待。"},
     '江東区': {'特徴': "湾岸タワーマンションの聖地。再開発による街の進化が続いており、将来的な資産価値も期待大。", '人気': "豊洲、有明、清澄白河、東陽町、門前仲町", 'ブランド': "パークホームズ豊洲ザ・レジデンス、シティタワーズ東京ベイ（有明）、ブランズタワー豊洲、プラウドタワー門前仲町、パークアクシス豊洲", '開発': "地下鉄8号線（有楽町線）の延伸が決定。新駅設置により、周辺エリアの相場上昇が始まっています。"},
     '品川区': {'特徴': "御殿山等の邸宅地と武蔵小山・大崎の再開発が融合。交通の要所として圧倒的な強みを持ちます。", '人気': "御殿山、高輪、武蔵小山、大崎、東五反田", 'ブランド': "パークシティ武蔵小山ザ・タワー、シティタワー武蔵小山、プラウドタワー目黒MARC、ブランズタワー大崎、パークコート白金長者丸", '開発': "品川駅のリニア始発駅化に向けた周辺整備により、将来の付加価値は抜群です。"},
     '目黒区': {'特徴': "洗練された東急沿線の文化と中目黒の活気が融合。高所得層が住みたい街の常連エリア。", '人気': "青葉台、自由が丘、中目黒、八雲、碑文谷", 'ブランド': "プラウド駒場、パークタワー目黒、中目黒アトラスタワー、ザ・パークハウス自由が丘、ディアナコート碑文谷", '開発': "自由が丘駅前で複数の再開発が始動。駅前の景観が刷新され、ブランド価値がさらに向上。"},
     '大田区': {'特徴': "田園調布・山王の歴史的邸宅地から蒲田の利便性まで、幅広い需要をカバーする住宅都市。", '人気': "田園調布、山王、久が原、雪が谷大塚、下丸子", 'ブランド': "プラウドシティ大田六郷、ザ・パークハウス山王、パークホームズ田園調布、ザ・リバープレイス、ブランズシティ久が原", '開発': "蒲蒲線（新空港線）計画や羽田跡地開発により、区南部のポテンシャルが再注目。"},
-    '世田谷区': {'特徴': "国内最大級の住宅都市。良好な住環境が維持されており、資産価値の安定感は抜群です。", '人気': "成城、深沢、等々力、代沢、二子玉川", 'ブランド': "プラウド二子玉川、グランドメゾン成城、ブランズ自由が丘（奥沢）、パークホームズ桜新町、深沢ハウス", '開発': "下北沢駅周辺の線路跡地開発により回遊性が向上し、感度の高い層の流入が加速。"},
+    '世田谷区': {'特徴': "国内最大級の住宅都市。良好な住環境が維持されており、資産価値の安定感は抜群です。", '人気': "成城、深沢、等々力、代沢、二子玉川", 'ブランド': "プラウド二子玉川、グランドメゾン成城、ブランズ自由が丘（奥沢）、パークホームズ桜新町、深沢ハウス", '開発': "下北沢駅周辺の線路跡地開発により回優性が向上し、感度の高い層の流入が加速。"},
     '渋谷区': {'特徴': "松濤や広尾の超一等地を擁する。需要が供給を常に上回る、国内屈指 Shoの希少エリア。", '人気': "広尾、松濤、代官山、神宮前、恵比寿", 'ブランド': "パークマンション代官山、広尾ガーデンヒルズ、ザ・パークハウス渋谷美竹、プラウド青山、恵比寿ガーデンテラス壱番館", '開発': "渋谷駅周辺の「100年に一度」の巨大開発により、徒歩圏のマンション需要が激増。"},
     '中野区': {'特徴': "中野駅周辺の巨大再開発により一躍注目度が上昇。職・住・学が融合する熱いエリア。", '人気': "中野、東中野、本町、松が丘、弥生町", 'ブランド': "パークタワー中野、中野ツインマークタワー、プラウド中野テラス、ザ・パークハウス中野、ユニオンマスタワー", '開発': "サンプラザ建て替えを含む4棟の大規模ビル建設により、ビジネス拠点機能が強化。"},
     '杉並区': {'特徴': "荻窪や浜田山など、落ち着いた環境が特徴。地に足の着いたファミリー層の支持が絶大。", '人気': "浜田山、荻窪、善福寺、久我山、阿佐ヶ谷", 'ブランド': "パークシティ浜田山、プラウド荻窪、グランドメゾン杉並シーズン、パークホームズ阿佐ヶ谷、ザ・パークハウス荻窪レジデンス", '開発': "中央線の連続立体交差事業や駅前整備により、街の南北分断が解消され利便性が向上。"},
@@ -66,22 +66,16 @@ ku_market_data = {
 # --- 2. ページ設定とスタイル ---
 st.set_page_config(page_title="23区マンションAI査定", layout="centered")
 
-# --- ここから追加 ---
 hide_st_style = """
     <style>
-    /* 右上のメニューボタンとヘッダーを完全に消去 */
     header[data-testid="stHeader"] { visibility: hidden; display: none; }
     footer { visibility: hidden; }
-
-    /* 上下の余白調整 */
     .block-container {
-        padding-top: 2rem !important;   /* 上に見切れないよう少し（2rem）余白を確保 */
-        padding-bottom: 7rem !important; /* 下はホームバーを避けて多めに確保 */
+        padding-top: 2rem !important;
+        padding-bottom: 7rem !important;
         padding-left: 1rem !important;
         padding-right: 1rem !important;
     }
-
-    /* タイトルの余白をリセット（見切れ防止） */
     h1 {
         margin-top: 0px !important;
         padding-top: 0px !important;
@@ -89,30 +83,21 @@ hide_st_style = """
     </style>
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
-# --- ここまで追加 ---
 
 st.markdown("""
     <style>
-    /* 全体の背景 */
     .stApp { background-color: #f8f9fa; }
-    
-    /* ボタンを強制的に中央に配置するための親コンテナ */
     .center-container {
         display: flex;
         justify-content: center;
         width: 100%;
         margin: 40px 0;
     }
-
-    div.stButton {
-        text-align: center;
-    }
-
-    /* ボタン自体のデザイン */
+    div.stButton { text-align: center; }
     div.stButton > button {
         display: inline-block;
         width: auto !important;
-        min-width: 340px !important; /* 横幅をしっかり確保 */
+        min-width: 340px !important;
         height: 60px !important;
         font-size: 26px !important;
         font-weight: bold !important;
@@ -122,15 +107,12 @@ st.markdown("""
         box-shadow: 0 8px 20px rgba(255, 75, 75, 0.3) !important;
         border: none !important;
         transition: all 0.3s ease;
-        padding: 0 60px !important; /* 文字の前後の空白感をCSSでも担保 */
+        padding: 0 60px !important;
     }
-    
     div.stButton > button:hover {
         transform: translateY(-3px) scale(1.02);
         box-shadow: 0 12px 25px rgba(255, 75, 75, 0.4) !important;
     }
-
-    /* マーケットカードのデザイン */
     .market-card {
         background-color: white; padding: 20px; border-radius: 15px;
         border-left: 5px solid #ff4b4b; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -149,6 +131,27 @@ def load_model():
 
 model = load_model()
 
+# ==========================================
+# 🆕 URLパラメータの取得ロジック
+# ==========================================
+query_params = st.query_params
+
+# 所在地（区）の取得
+default_ku_idx = 3 # デフォルト新宿区
+if "location" in query_params:
+    p_loc = query_params["location"]
+    for i, ku in enumerate(ku_market_data.keys()):
+        if ku in p_loc: # "新宿区"が含まれていれば合致
+            default_ku_idx = i
+            break
+
+# 数値パラメータの取得（安全にfloat/intに変換）
+default_area = int(float(query_params.get("area", 60)))
+default_walk = int(float(query_params.get("walk", 5)))
+# 築年数(age)から西暦(year)を逆算 (例: 築3年なら2022)
+default_age = int(float(query_params.get("age", 10)))
+default_year = 2025 - default_age
+
 # --- 4. 入力フォーム ---
 st.title("🏙️ 東京23区マンション AI査定")
 st.caption("AIが最新の市場データに基づき、あなたのマンションの価値を瞬時に算出します。")
@@ -156,25 +159,30 @@ st.caption("AIが最新の市場データに基づき、あなたのマンショ
 with st.container():
     col1, col2 = st.columns(2)
     with col1:
-        selected_ku = st.selectbox("区を選択", list(ku_market_data.keys()))
+        selected_ku = st.selectbox("区を選択", list(ku_market_data.keys()), index=default_ku_idx)
         town_options = town_data.get(selected_ku, ["その他"])
         selected_loc = st.selectbox("所在地（町名）を選択", town_options)
         
     with col2:
-        area = st.number_input("専有面積 (㎡)", min_value=10, max_value=300, value=60, step=1, format="%d")
-        walk = st.slider("駅より徒歩 (分)", 0, 30, 5)
+        area = st.number_input("専有面積 (㎡)", min_value=10, max_value=300, value=default_area, step=1, format="%d")
+        walk = st.slider("駅より徒歩 (分)", 0, 30, default_walk)
     
-    year_now = st.number_input("築年月 (西暦)", min_value=1970, max_value=2025, value=2015, step=1, format="%d")
+    year_now = st.number_input("築年月 (西暦)", min_value=1970, max_value=2025, value=default_year, step=1, format="%d")
 
-# --- 5. 査定実行ボタン（中央配置の完成版） ---
+# --- 5. 査定実行ボタン ---
 st.write("") 
-# divタグ(center-container)で囲むことで、CSSの中央寄せを確実に適用
 st.markdown('<div class="center-container">', unsafe_allow_html=True)
-clicked = st.button("　　AI査定を実行する　　") # 前後に全角空白を追加
+clicked = st.button("　　AI査定を実行する　　") 
 st.markdown('</div>', unsafe_allow_html=True)
 
+# ==========================================
+# 🆕 埋め込み時の自動実行フラグ
+# URLにパラメータが含まれている場合は、初回読み込み時に自動で計算を行う
+# ==========================================
+is_auto_run = ("area" in query_params)
+
 # --- 6. 査定ロジックと結果表示 ---
-if clicked:
+if clicked or is_auto_run:
     full_address = f"東京都{selected_ku}{selected_loc}"
     input_df = pd.DataFrame([{
         '区': selected_ku, '所在': full_address, '専有面積': area, 
@@ -188,7 +196,7 @@ if clicked:
         
         # 結果表示
         st.divider()
-        st.balloons() 
+        if not is_auto_run: st.balloons() # 手動クリック時のみバルーン
         st.subheader(f"📊 査定結果: {selected_ku} {selected_loc}")
         
         m1, m2 = st.columns(2)
@@ -219,6 +227,3 @@ if clicked:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
-
-
-
