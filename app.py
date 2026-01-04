@@ -246,9 +246,17 @@ if clicked or auto_run_trigger:
         # JavaScriptを埋め込んで親にデータを送る
         st.components.v1.html(f"""
             <script>
-                // 親ウィンドウにデータを送信
-                window.parent.postMessage({json.dumps(res_data)}, "*");
-                console.log("Data sent to 1111.html:", {json.dumps(res_data)});
+                const resData = {json.dumps(res_data)};
+                
+                // 1. 直接の親(Streamlitの内部フレーム)へ送信
+                window.parent.postMessage(resData, "*");
+                
+                // 2. さらにその外側の親(1111.html)へ送信
+                if (window.parent.parent) {{
+                    window.parent.parent.postMessage(resData, "*");
+                }}
+                
+                console.log("Sent from AI to 1111.html:", resData);
             </script>
         """, height=0)
 
@@ -266,5 +274,6 @@ if clicked or auto_run_trigger:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+
 
 
