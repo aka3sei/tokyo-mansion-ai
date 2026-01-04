@@ -133,20 +133,30 @@ def load_model():
 model = load_model()
 
 # ==========================================
-# 🆕 URLパラメータの取得ロジック
+# 🆕 URLパラメータの取得ロジック（修正版）
 # ==========================================
 query_params = st.query_params
 
-# 所在地（区）の取得
-default_ku_idx = 3 # デフォルト新宿区
+# 1. 所在地の取得（区と町名のインデックスを特定）
+default_ku_idx = 3     # デフォルト：新宿区
+default_town_idx = 0   # デフォルト：最初の町名
+
 if "location" in query_params:
     p_loc = query_params["location"]
+    
+    # まず「区」を特定
     for i, ku in enumerate(ku_market_data.keys()):
         if ku in p_loc:
             default_ku_idx = i
+            # 次に、その区の中にある「町名」を特定
+            town_list = town_data.get(ku, [])
+            for j, town in enumerate(town_list):
+                if town in p_loc:
+                    default_town_idx = j
+                    break
             break
 
-# 数値パラメータの取得（安全に変換）
+# 2. 数値パラメータの取得（安全に変換）
 try:
     default_area = int(float(query_params.get("area", 60)))
     default_walk = int(float(query_params.get("walk", 5)))
@@ -165,9 +175,12 @@ if 'first_run' not in st.session_state:
 with st.container():
     col1, col2 = st.columns(2)
     with col1:
+        # 【修正】indexに default_ku_idx を適用
         selected_ku = st.selectbox("区を選択", list(ku_market_data.keys()), index=default_ku_idx)
+        
         town_options = town_data.get(selected_ku, ["その他"])
-        selected_loc = st.selectbox("所在地（町名）を選択", town_options)
+        # 【修正】indexに default_town_idx を適用（これで町名が自動選択されます）
+        selected_loc = st.selectbox("所在地（町名）を選択", town_options, index=default_town_idx)
         
     with col2:
         area = st.number_input("専有面積 (㎡)", min_value=10, max_value=300, value=default_area, step=1, format="%d")
@@ -247,3 +260,4 @@ if clicked or auto_run_trigger:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+
