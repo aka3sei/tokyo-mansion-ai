@@ -133,24 +133,30 @@ def load_model():
 model = load_model()
 
 # ==========================================
-# 🆕 URLパラメータの取得ロジック（修正版）
+# 🆕 URLパラメータの取得ロジック（修正版：町名一致の精度向上）
 # ==========================================
 query_params = st.query_params
 
-# 1. 所在地の取得（区と町名のインデックスを特定）
-default_ku_idx = 3     # デフォルト：新宿区
-default_town_idx = 0   # デフォルト：最初の町名
+# デフォルト値の設定
+default_ku_idx = 3     # 新宿区
+default_town_idx = 0   # 新宿
 
 if "location" in query_params:
     p_loc = query_params["location"]
     
-    # まず「区」を特定
+    # 1. まず「区」を特定
     for i, ku in enumerate(ku_market_data.keys()):
         if ku in p_loc:
             default_ku_idx = i
-            # 次に、その区の中にある「町名」を特定
+            
+            # 2. その区の町名リストを取得
             town_list = town_data.get(ku, [])
-            for j, town in enumerate(town_list):
+            
+            # 【重要】名前が長い順に並び替えてから検索（例：「西新宿」を「新宿」より先に判定）
+            # これにより「西新宿」を「新宿」として誤判定するのを防ぎます
+            sorted_towns = sorted(enumerate(town_list), key=lambda x: len(x[1]), reverse=True)
+            
+            for j, town in sorted_towns:
                 if town in p_loc:
                     default_town_idx = j
                     break
@@ -260,4 +266,5 @@ if clicked or auto_run_trigger:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+
 
