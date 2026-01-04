@@ -243,20 +243,23 @@ if clicked or auto_run_trigger:
             "range_max": int(round(price_base * 1.25))
         }
 
-        # JavaScriptを埋め込んで親にデータを送る
         st.components.v1.html(f"""
             <script>
                 const resData = {json.dumps(res_data)};
                 
-                // 1. 直接の親(Streamlitの内部フレーム)へ送信
-                window.parent.postMessage(resData, "*");
+                // 1111.html（一番外側の親）に確実に届くように送信先を広げます
+                // window.top は、どんなにiframeが重なっていても一番外側の画面を指します
+                if (window.top) {{
+                    window.top.postMessage(resData, "*");
+                }}
                 
-                // 2. さらにその外側の親(1111.html)へ送信
-                if (window.parent.parent) {{
+                // 念のため、これまでの送り方も併記（しらみつぶしに送る）
+                window.parent.postMessage(resData, "*");
+                if (window.parent && window.parent.parent) {{
                     window.parent.parent.postMessage(resData, "*");
                 }}
                 
-                console.log("Sent from AI to 1111.html:", resData);
+                console.log("AIから親画面(1111.html)へ強制送信を試行しました:", resData);
             </script>
         """, height=0)
 
@@ -274,6 +277,7 @@ if clicked or auto_run_trigger:
 
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
+
 
 
 
